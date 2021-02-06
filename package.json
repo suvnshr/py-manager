@@ -8,15 +8,20 @@
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.2",
     "@testing-library/user-event": "^12.2.2",
+    "axios": "^0.21.1",
+    "compare-versions": "^3.6.0",
     "cross-env": "^7.0.2",
     "electron-is-dev": "^1.2.0",
+    "marked": "^1.2.5",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-icons": "^4.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
+    "rst2html": "^1.0.4",
     "web-vitals": "^0.2.4"
   },
-  "main": "main.js",
+  "main": "src/electron/main.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -48,6 +53,6 @@
     "concurrently": "^5.3.0",
     "electron": "^10.1.5",
     "electron-builder": "^22.9.1",
-    "wait-on": "^5.2.0"
+    "wait-on": "^5.2.1"
   }
 }

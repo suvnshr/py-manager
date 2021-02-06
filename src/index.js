@@ -1,29 +1,34 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import Home from "./home/Home";
-import "./commons/index.css";
-import reportWebVitals from "./reportWebVitals";
-import { ThemeProvider } from "@material-ui/core";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import theme from "./commons/theme";
-import Root from "./commons/Root";
-import routes from "./commons/routes";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Home from './home/Home';
+import './commons/index.css';
+import reportWebVitals from './reportWebVitals';
+import { CssBaseline, ThemeProvider } from '@material-ui/core';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import customTheme from './commons/theme';
+import Root from './commons/Root';
+import routes from './commons/routes';
+import PackageDetail from './package-detail/PackageDetail';
 
 ReactDOM.render(
-    <React.StrictMode>
-        <Router>
-            <ThemeProvider theme={theme}>
-                <Switch>
-                    <Route exact path={routes.HOME}>
-                        <Root>
-                            <Home />
-                        </Root>
-                    </Route>
-                </Switch>
-            </ThemeProvider>
-        </Router>
-    </React.StrictMode>,
-    document.getElementById("root"),
+	<React.StrictMode>
+		<ThemeProvider theme={customTheme}>
+			<CssBaseline />
+			<Router>
+				<Switch>
+					<Route exact path={routes.HOME}>
+						<Root>
+							<Home />
+						</Root>
+					</Route>
+					<Route path={routes.PACKAGE_DETAIL_WITH_PARAM}>
+						<PackageDetail />
+					</Route>
+				</Switch>
+			</Router>
+		</ThemeProvider>
+	</React.StrictMode>,
+	document.getElementById('root'),
 );
 
 // If you want to start measuring performance in your app, pass a function

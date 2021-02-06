@@ -1,13 +1,13 @@
 import React from "react";
 import Header from "./Header";
 
-function Root(props) {
-    return (
-        <div>
-            <Header />
-            <main>{props.children}</main>
-        </div>
-    );
+function Root({showBack, children}) {
+	return (
+		<div>
+			<Header showBack={showBack} />
+			<main>{children}</main>
+		</div>
+	);
 }
 
 export default Root;
