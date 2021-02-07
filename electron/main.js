@@ -20,17 +20,22 @@ function createWindow() {
 	mainWindow.loadURL(
 		isDev
 			? 'http://localhost:3000'
-			: `file://${path.join(__dirname, '../build/index.html')}`,
+			: `file://${path.join(__dirname, 'src/build/index.html')}`,
 	);
 
-	const {
-		default: installExtension,
-		REACT_DEVELOPER_TOOLS,
-	} = require('electron-devtools-installer');
+	
+	// Install the extension if developer mode is ON
+	if (isDev) {
 
-	installExtension(REACT_DEVELOPER_TOOLS)
-		.then(name => console.log(name + ' added'))
-		.catch(err => console.log(err + ' occured'));
+		const {
+			default: installExtension,
+			REACT_DEVELOPER_TOOLS,
+		} = require('electron-devtools-installer');
+		
+		installExtension(REACT_DEVELOPER_TOOLS)
+			.then(name => console.log(name + ' added'))
+			.catch(err => console.log(err + ' occured'));
+	}
 }
 
 app.whenReady().then(createWindow);
