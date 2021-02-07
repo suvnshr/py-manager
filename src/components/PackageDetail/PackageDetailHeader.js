@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import { ArrowBackOutlined } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
-import routes from '../commons/routes';
+import routes from '../../commons/routes';
 
 const useStyles = makeStyles(theme => ({
 	root: {

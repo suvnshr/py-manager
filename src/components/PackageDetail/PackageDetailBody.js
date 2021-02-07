@@ -7,7 +7,7 @@ import {
 	SupervisedUserCircleRounded,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
-import routes from '../commons/routes';
+import routes from '../../commons/routes';
 
 const packageProperties = {
 	'author': <SupervisedUserCircleRounded />,

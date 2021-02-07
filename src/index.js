@@ -1,14 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Home from './home/Home';
-import './commons/index.css';
 import reportWebVitals from './reportWebVitals';
 import { CssBaseline, ThemeProvider } from '@material-ui/core';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+
+import './commons/index.css';
+
 import customTheme from './commons/theme';
 import Root from './commons/Root';
 import routes from './commons/routes';
-import PackageDetail from './package-detail/PackageDetail';
+
+import Home from './components/Home/Home';
+import PackageDetail from './components/PackageDetail/PackageDetail';
 
 ReactDOM.render(
 	<React.StrictMode>

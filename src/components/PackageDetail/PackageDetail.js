@@ -47,9 +47,7 @@ function PackageDetail() {
 				setLocalPackageData(_localPackageData);
 			},
 		);
-	}, [packageName]);
 
-	useEffect(() => {
 		if (
 			packageData !== null &&
 			localPackageData !== null &&
@@ -58,12 +56,16 @@ function PackageDetail() {
 			let _updatable = compareVersions.compare(
 				packageData.info.version,
 				localPackageData.version,
-				'>',
+				'<',
 			);
-
-			setUpdatable(_updatable);
+			
+			setUpdatable(Boolean(_updatable));
 		}
-	}, [packageData]);
+	}, [packageName]);
+
+	// useEffect(() => {
+		
+	// }, [packageData]);
 
 	const loader = (
 		<Grid
