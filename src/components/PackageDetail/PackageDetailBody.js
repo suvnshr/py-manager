@@ -63,6 +63,7 @@ function PackageDetailBody({
 								key={`package-chip-${index}`}
 								icon={propertyIcon}
 								color="secondary"
+								component="span"
 								label={`${localPackageData[propertyName]}`}
 								style={{ margin: 5 }}
 								onClick={() => null}
@@ -78,8 +79,10 @@ function PackageDetailBody({
 							<p>
 								{requiredBy.map(packageName => (
 									<Chip
+										key={`required-by-${packageName}`}
 										label={packageName}
 										color="secondary"
+										component="span"
 										style={{ margin: 5 }}
 										onClick={() => goToOtherPackage(packageName)}
 									/>
@@ -94,7 +97,9 @@ function PackageDetailBody({
 							<p>
 								{requires.map(packageName => (
 									<Chip
+										key={`requires-${packageName}`}
 										label={packageName}
+										component="span"
 										onClick={() => goToOtherPackage(packageName)}
 										color="secondary"
 										style={{ margin: 5 }}
