@@ -6,13 +6,16 @@ import {
 	Container,
 	InputAdornment,
 	MenuItem,
+	Button,
+	ListItemIcon,
+	Typography,
+	Divider,
 } from '@material-ui/core';
 // import eventNames from '../commons/eventNames';
 import PackageCard from './PackageCard';
-import { SearchOutlined } from '@material-ui/icons';
-
+import EnvAdditionModal from './EnvAdditionModal';
+import { Add, Pages, SearchOutlined } from '@material-ui/icons';
 import { FaPython } from 'react-icons/fa';
-
 const { ipcRenderer } = window.require('electron');
 
 const ENVS = ['main', '1234567890'];
@@ -21,6 +24,11 @@ function Home() {
 	const [packages, setPackages] = useState(null);
 	const [query, setQuery] = useState('');
 	const [env, setEnv] = useState(ENVS[0]);
+	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
+
+	const handleEnvAdditionDialogClose = ev => {
+		setEnvAdditionModalOpen(false);
+	};
 
 	useEffect(() => {
 		ipcRenderer.invoke('RECEIVE_PACKAGES');
@@ -31,9 +39,16 @@ function Home() {
 	}, []);
 
 	const handleEnvChange = ev => {
-		setEnv(ev.target.value);
+		const value = ev.target.value;
+
+		if (value !== null) setEnv(ev.target.value);
+		else 
+			handleEnvAddition(ev);
 	};
 
+	const handleEnvAddition = ev => {
+		setEnvAdditionModalOpen(true);
+	};
 	const performSearch = ev => setQuery(ev.target.value.toLowerCase());
 
 	const loader = <CircularProgress />;
@@ -109,6 +124,21 @@ function Home() {
 										{option}
 									</MenuItem>
 								))}
+
+								<Divider light />
+
+								<MenuItem value={null}>
+									<ListItemIcon>
+										<Add />
+									</ListItemIcon>
+
+									<Typography
+										variant="inherit"
+										align="center"
+									>
+										Add Env
+									</Typography>
+								</MenuItem>
 							</TextField>
 						</Grid>
 					</Grid>
@@ -116,10 +146,29 @@ function Home() {
 				</Grid>
 			</Grid>
 
+			<p>
+				<Grid justify="center" container>
+					<Button variant="contained" color="secondary">
+						Install Packages
+					</Button>
+				</Grid>
+			</p>
+
 			<p />
 
+			<Divider light />
+
 			<Container>
+				{packages !== null ? (
+					<div style={{padding: 10}}>
+						<Typography variant="subtitle1" align="left">
+							{packages.length} packages installed
+						</Typography>
+					</div>
+				) : null}
+
 				<Grid container justify="center">
+
 					{packages === null
 						? loader
 						: packages.length === 0
@@ -127,6 +176,9 @@ function Home() {
 						: packagesList()}
 				</Grid>
 			</Container>
+			
+			<EnvAdditionModal isOpen={envAdditionModalOpen} handleClose={handleEnvAdditionDialogClose} />
+
 		</div>
 	);
 }
