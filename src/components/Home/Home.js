@@ -16,6 +16,7 @@ import PackageCard from './PackageCard';
 import EnvAdditionModal from './EnvAdditionModal';
 import { Add, Pages, SearchOutlined } from '@material-ui/icons';
 import { FaPython } from 'react-icons/fa';
+import InstallPackagesModal from './InstallPackagesModal';
 const { ipcRenderer } = window.require('electron');
 
 const ENVS = ['main', '1234567890'];
@@ -25,10 +26,20 @@ function Home() {
 	const [query, setQuery] = useState('');
 	const [env, setEnv] = useState(ENVS[0]);
 	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
+	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(false);
 
 	const handleEnvAdditionDialogClose = ev => {
 		setEnvAdditionModalOpen(false);
 	};
+
+	const handlePackageInstallModalClose = ev => {
+		setPackageInstallModalOpen(false);
+	};
+
+	const handlePackageInstall = ev => {
+		setPackageInstallModalOpen(true);
+	}
+ 	
 
 	useEffect(() => {
 		ipcRenderer.invoke('RECEIVE_PACKAGES');
@@ -148,7 +159,7 @@ function Home() {
 
 			<p>
 				<Grid justify="center" container>
-					<Button variant="contained" color="secondary">
+					<Button variant="contained" color="secondary" onClick={handlePackageInstall} >
 						Install Packages
 					</Button>
 				</Grid>
@@ -176,8 +187,11 @@ function Home() {
 						: packagesList()}
 				</Grid>
 			</Container>
+
+			{/* Modals */}
 			
 			<EnvAdditionModal isOpen={envAdditionModalOpen} handleClose={handleEnvAdditionDialogClose} />
+			<InstallPackagesModal isOpen={packageInstallModalOpen} handleClose={handlePackageInstallModalClose} />
 
 		</div>
 	);
