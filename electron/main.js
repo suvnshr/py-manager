@@ -59,3 +59,8 @@ ipcMain.handle('RECEIVE_PACKAGES', function () {
 ipcMain.handle('RECEIVE_LOCAL_DETAIL', function (ev, packageName) {
 	pipPackagesHandler.getPackageDetail(mainWindow, packageName);
 });
+
+
+ipcMain.handle('SEARCH_ONLINE', function (ev, packageQuery) {
+	pipPackagesHandler.searchPythonPackageOnline(mainWindow, packageQuery);
+});
