@@ -34,7 +34,7 @@ function createWindow() {
 		
 		installExtension(REACT_DEVELOPER_TOOLS)
 			.then(name => console.log(name + ' added'))
-			.catch(err => console.log(err + ' occured'));
+			.catch(err => console.log(err + ' occurred'));
 	}
 }
 
@@ -63,4 +63,9 @@ ipcMain.handle('RECEIVE_LOCAL_DETAIL', function (ev, packageName) {
 
 ipcMain.handle('SEARCH_ONLINE', function (ev, packageQuery) {
 	pipPackagesHandler.searchPythonPackageOnline(mainWindow, packageQuery);
+});
+
+
+ipcMain.handle('PACKAGE_UNINSTALL', function (ev, packageName) {
+	pipPackagesHandler.uninstallPackage(mainWindow, packageName);
 });

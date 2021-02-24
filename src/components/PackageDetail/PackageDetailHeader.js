@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Typography,
 	makeStyles,
@@ -10,6 +10,8 @@ import {
 import { ArrowBackOutlined } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import routes from '../../commons/routes';
+
+const { ipcRenderer } = window.require('electron');
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -27,12 +29,47 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-function PackageDetailHeader({packageName, updatable}) {
+function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 	const classes = useStyles();
 	const history = useHistory();
 
+	const [uninstallPromptShowed, setUninstallPromptShowed] = useState(false);
+
 	const goBack = ev => {
 		history.push(routes.HOME);
+	};
+
+	useEffect(() => {
+		if (!uninstallPromptShowed) {
+		
+			ipcRenderer.on(
+				'UNINSTALL_MESSAGE',
+				function (ev, uninstallMessage) {
+					window.alert(uninstallMessage);
+					goBack();
+				},
+			);
+
+			setUninstallPromptShowed(true);
+		}
+	}, []);
+
+
+	const uninstallPackage = () => {
+		let requiredBy = localPackageData['required-by'];
+		if (typeof requiredBy === 'undefined') requiredBy = '';
+
+		let confirmUninstallMsg = `Do you want to uninstall ${packageName}?`;
+
+		if (requiredBy) {
+			confirmUninstallMsg += ` It is required by ${requiredBy}.`;
+		}
+
+		const confirmUninstall = window.confirm(confirmUninstallMsg);
+
+		if (confirmUninstall) {
+			ipcRenderer.invoke('PACKAGE_UNINSTALL', packageName);
+		}
 	};
 
 	return (
@@ -65,6 +102,7 @@ function PackageDetailHeader({packageName, updatable}) {
 						variant="contained"
 						color="secondary"
 						style={{ margin: '0 7px' }}
+						onClick={uninstallPackage}
 					>
 						Remove
 					</Button>

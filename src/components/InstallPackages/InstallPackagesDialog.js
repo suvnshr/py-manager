@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItem from '@material-ui/core/ListItem';
-import List from '@material-ui/core/List';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-import Slide from '@material-ui/core/Slide';
-import { SearchOutlined } from '@material-ui/icons';
+import { SearchOutlined, Close } from '@material-ui/icons';
 
 import {
 	CircularProgress,
@@ -19,16 +7,26 @@ import {
 	Divider,
 	Grid,
 	InputAdornment,
-	ListItemIcon,
 	TextField,
+	List,
+	Dialog,
+	Button,
+	makeStyles,
+	AppBar,
+	Toolbar,
+	IconButton,
+	Typography,
+	Slide,
 } from '@material-ui/core';
 
 import { FaPython } from 'react-icons/fa';
 
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import { isNotEmpty } from '../../commons/helpers';
+import { isNotEmpty, SlideDialogTransition } from '../../commons/helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
+import PackageSearchItem from './PackageSearchItem';
+import InstallConfirmDialog from './InstallConfirmDialog';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -46,23 +44,54 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-	return <Slide direction="up" ref={ref} {...props} />;
-});
-
-export default function InstallPackagesModal({ isOpen, handleClose }) {
+export default function InstallPackagesDialog({
+	isOpen,
+	installedPackages,
+	handleClose,
+}) {
 	const classes = useStyles();
+
+	// Search data 
 	const [searchedPackages, setSearchedPackages] = useState(null);
+	
+	// set to `true` when search request is sent to electron
+	// set to `false` initially and after search data is received from electron
 	const [packageLoading, setPackageLoading] = useState(false);
 
+	// Contains the packages selected by user for installation
+	const [packagesToInstall, setPackagesToInstall] = useState([]);
+
+	// Whether `InstallConfirmDialog` is open or not
+	const [confirmInstall, setConfirmInstall] = useState(false);
+
+	// Show search results when search data is received from electron
 	useEffect(() => {
 		ipcRenderer.on('SEARCH_DATA', function (ev, matchedPackages) {
-			console.log(matchedPackages);
 			setSearchedPackages(matchedPackages);
 			setPackageLoading(false);
 		});
 	}, []);
 
+	// `react-hook-form` initialization options
+	const { register, handleSubmit, errors } = useForm({
+		resolver: yupResolver(Schema),
+		criteriaMode: 'firstError',
+		mode: 'onSubmit',
+		reValidateMode: 'onSubmit',
+	});
+
+	
+	// Opens the `InstallConfirmDialog`
+	const showInstallConfirmDialog = ev => {
+		setConfirmInstall(true);
+	};
+	
+	// Closes the `InstallConfirmDialog`
+	const handleConfirmInstallClose = ev => {
+		setConfirmInstall(false);
+	};
+	
+	// Request electron to search `pypi.org`
 	const formSubmit = formData => {
 		console.log(formData);
 
@@ -75,14 +104,10 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 		}
 	};
 
-	const { register, handleSubmit, errors } = useForm({
-		resolver: yupResolver(Schema),
-		criteriaMode: 'firstError',
-		mode: 'onSubmit',
-		reValidateMode: 'onSubmit',
-	});
+	// Generates components to be shown to represent the search results 
+	// ...and the current state of the search operation.
+	const renderSearchResults = () => {
 
-	const makeContent = () => {
 		if (packageLoading) {
 			return (
 				<Grid container justify="center" style={{ height: '80vh' }}>
@@ -91,8 +116,8 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 			);
 		} else if (searchedPackages !== null) {
 
-			if(searchedPackages === -1) {
-				return <div>Error occurred while searching.</div>
+			if (searchedPackages === -1) {
+				return <div>Error occurred while searching.</div>;
 			}
 
 			if (Object.keys(searchedPackages) === 0) {
@@ -101,15 +126,17 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 
 			const listItems = Object.keys(searchedPackages).map(
 				(packageName, index) => (
-					<ListItem divider={true} button key={`package-search-item-${index}`}>
-						<ListItemIcon>
-							<FaPython fontSize={24} />
-						</ListItemIcon>
-						<ListItemText
-							primary={packageName}
-							secondary={searchedPackages[packageName]}
-						/>
-					</ListItem>
+					<PackageSearchItem
+						key={`package-search-item-${index}`}
+						packageDescription={searchedPackages[packageName]}
+						{...{
+							packageName,
+							index,
+							packagesToInstall,
+							setPackagesToInstall,
+							installedPackages,
+						}}
+					/>
 				),
 			);
 
@@ -119,11 +146,13 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 					<Divider />
 					<p />
 
+					{/* Packages count */}
 					<Typography align="right" variant="subtitle2">
 						{Object.keys(searchedPackages).length} packages found
 					</Typography>
 					<p />
 
+					{/* Search results */}
 					<List>{listItems}</List>
 				</div>
 			);
@@ -136,7 +165,7 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 				fullScreen
 				open={isOpen}
 				onClose={handleClose}
-				TransitionComponent={Transition}
+				TransitionComponent={SlideDialogTransition}
 			>
 				<AppBar className={classes.appBar}>
 					<Toolbar>
@@ -146,13 +175,23 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 							onClick={handleClose}
 							aria-label="close"
 						>
-							<CloseIcon />
+							<Close />
 						</IconButton>
 						<Typography variant="h6" className={classes.title}>
 							Install Packages
 						</Typography>
-						<Button autoFocus color="inherit" onClick={handleClose}>
+
+						<Button
+							autoFocus
+							variant="contained"
+							color="secondary"
+							onClick={showInstallConfirmDialog}
+							disabled={!Boolean(packagesToInstall.length)}
+						>
 							Install
+							{packagesToInstall.length !== 0
+								? ` (${packagesToInstall.length})`
+								: null}
 						</Button>
 					</Toolbar>
 				</AppBar>
@@ -187,7 +226,6 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 								/>
 
 								<p />
-
 								<Grid container justify="flex-end">
 									<Button
 										type="submit"
@@ -201,10 +239,19 @@ export default function InstallPackagesModal({ isOpen, handleClose }) {
 
 							{/* Search Results */}
 
-							<List>{makeContent()}</List>
+							<List>{renderSearchResults()}</List>
 						</Grid>
 					</Grid>
 				</Container>
+				{/* ['Django', 'six', 'name'] */}
+				<InstallConfirmDialog
+					open={confirmInstall}
+					{...{
+						packagesToInstall, // ['Django', 'six']
+						setPackagesToInstall,
+						handleConfirmInstallClose,
+					}}
+				/>
 			</Dialog>
 		</div>
 	);

@@ -101,6 +101,27 @@ class PipHandler {
 				mainWindow.webContents.send('SEARCH_DATA', -1);
 			});
 	}
+
+	uninstallPackage(mainWindow, packageName) {
+
+		const PIP = this.getPip();
+
+		exec(`${PIP} uninstall ${packageName} --yes`, (error, stdout, stderr) => {
+
+			let uninstallMessage = `${packageName} is successfully removed`;
+			
+			if(error) {
+				uninstallMessage = `Error while uninstalling ${packageName}: ${error}`
+			}
+			
+			if(stderr) {
+				uninstallMessage = `Error while uninstalling ${packageName}: ${stderr}`;
+			}
+			
+			mainWindow.webContents.send('UNINSTALL_MESSAGE', uninstallMessage);
+
+		});
+	}
 }
 
 module.exports = PipHandler;

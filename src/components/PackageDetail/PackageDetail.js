@@ -41,12 +41,9 @@ function PackageDetail() {
 				setPackageData(-1);
 			});
 
-		ipcRenderer.on(
-			'SEND_LOCAL_DETAIL',
-			function (ev, _localPackageData) {
-				setLocalPackageData(_localPackageData);
-			},
-		);
+		ipcRenderer.on('SEND_LOCAL_DETAIL', function (ev, _localPackageData) {
+			setLocalPackageData(_localPackageData);
+		});
 
 		if (
 			packageData !== null &&
@@ -58,13 +55,13 @@ function PackageDetail() {
 				localPackageData.version,
 				'<',
 			);
-			
+
 			setUpdatable(Boolean(_updatable));
 		}
 	}, [packageName]);
 
 	// useEffect(() => {
-		
+
 	// }, [packageData]);
 
 	const loader = (
@@ -81,7 +78,9 @@ function PackageDetail() {
 	if (packageData !== null && localPackageData !== null) {
 		return (
 			<div>
-				<PackageDetailHeader {...{ packageName, updatable }} />
+				<PackageDetailHeader
+					{...{ packageName, updatable, localPackageData }}
+				/>
 
 				<PackageDetailBody
 					{...{

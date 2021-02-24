@@ -16,7 +16,7 @@ import PackageCard from './PackageCard';
 import EnvAdditionModal from './EnvAdditionModal';
 import { Add, Pages, SearchOutlined } from '@material-ui/icons';
 import { FaPython } from 'react-icons/fa';
-import InstallPackagesModal from './InstallPackagesModal';
+import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
 const { ipcRenderer } = window.require('electron');
 
 const ENVS = ['main', '1234567890'];
@@ -26,7 +26,9 @@ function Home() {
 	const [query, setQuery] = useState('');
 	const [env, setEnv] = useState(ENVS[0]);
 	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
-	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(false);
+	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(
+		false,
+	);
 
 	const handleEnvAdditionDialogClose = ev => {
 		setEnvAdditionModalOpen(false);
@@ -38,8 +40,7 @@ function Home() {
 
 	const handlePackageInstall = ev => {
 		setPackageInstallModalOpen(true);
-	}
- 	
+	};
 
 	useEffect(() => {
 		ipcRenderer.invoke('RECEIVE_PACKAGES');
@@ -53,8 +54,7 @@ function Home() {
 		const value = ev.target.value;
 
 		if (value !== null) setEnv(ev.target.value);
-		else 
-			handleEnvAddition(ev);
+		else handleEnvAddition(ev);
 	};
 
 	const handleEnvAddition = ev => {
@@ -157,13 +157,18 @@ function Home() {
 				</Grid>
 			</Grid>
 
-			<p>
+			<p />
+			{packages !== null ? (
 				<Grid justify="center" container>
-					<Button variant="contained" color="secondary" onClick={handlePackageInstall} >
+					<Button
+						variant="contained"
+						color="secondary"
+						onClick={handlePackageInstall}
+					>
 						Install Packages
 					</Button>
 				</Grid>
-			</p>
+			) : null}
 
 			<p />
 
@@ -171,7 +176,7 @@ function Home() {
 
 			<Container>
 				{packages !== null ? (
-					<div style={{padding: 10}}>
+					<div style={{ padding: 10 }}>
 						<Typography variant="subtitle1" align="left">
 							{packages.length} packages installed
 						</Typography>
@@ -179,7 +184,6 @@ function Home() {
 				) : null}
 
 				<Grid container justify="center">
-
 					{packages === null
 						? loader
 						: packages.length === 0
@@ -189,10 +193,18 @@ function Home() {
 			</Container>
 
 			{/* Modals */}
-			
-			<EnvAdditionModal isOpen={envAdditionModalOpen} handleClose={handleEnvAdditionDialogClose} />
-			<InstallPackagesModal isOpen={packageInstallModalOpen} handleClose={handlePackageInstallModalClose} />
 
+			<EnvAdditionModal
+				isOpen={envAdditionModalOpen}
+				handleClose={handleEnvAdditionDialogClose}
+			/>
+
+			{/* Modal to install packages */}
+			<InstallPackagesDialog
+				isOpen={packageInstallModalOpen}
+				installedPackages={packages}
+				handleClose={handlePackageInstallModalClose}
+			/>
 		</div>
 	);
 }

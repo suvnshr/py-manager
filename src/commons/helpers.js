@@ -1,3 +1,6 @@
+import React from 'react'
+import Slide from "@material-ui/core/Slide";
+
 /**
  * returns true if an object is "not" empty
  * else it returns false
@@ -9,4 +12,26 @@ const isNotEmpty = obj => {
 		: Boolean(Object.keys(obj).length);
 };
 
-export { isNotEmpty };
+
+
+const isPackageInstalled = (packageName, installedPackages) => {
+
+	let found = false
+
+	installedPackages.forEach(_packageData => {
+		if(_packageData.name == packageName) {
+			found = true;
+		}
+	});
+	
+	return found;
+	
+};
+
+
+const SlideDialogTransition = React.forwardRef(function Transition(props, ref) {
+	return <Slide direction="up" ref={ref} {...props} />;
+});
+
+
+export { isNotEmpty, isPackageInstalled, SlideDialogTransition };
