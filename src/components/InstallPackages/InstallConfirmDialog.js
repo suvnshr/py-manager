@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Dialog,
 	DialogActions,
@@ -12,13 +12,15 @@ import {
 
 import { SlideDialogTransition } from '../../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
-const {ipcRenderer} = window.require("electron");
+const { ipcRenderer } = window.require('electron');
 
 export default function InstallConfirmDialog({
 	open,
 	packagesToInstall,
 	setPackagesToInstall,
 	handleConfirmInstallClose,
+	handlePackageModalClose,
+	setOpenInstallStatusModal,
 }) {
 	const [finalPackages, setFinalPackages] = useState({});
 
@@ -26,9 +28,10 @@ export default function InstallConfirmDialog({
 
 	const installPackages = () => {
 		console.log('Packages to Install:', finalPackages);
-
-		ipcRenderer.invoke("PACKAGES_INSTALL", finalPackages);
-
+		ipcRenderer.invoke('PACKAGES_INSTALL', finalPackages);
+		handleConfirmInstallClose();
+		handlePackageModalClose();
+		setOpenInstallStatusModal(true);
 	};
 
 	// Removes a package from `packagesToInstall`
@@ -40,21 +43,23 @@ export default function InstallConfirmDialog({
 			_newPackagesToInstall.splice(indexOfPackage, 1);
 			setPackagesToInstall(_newPackagesToInstall);
 
-			let _finalPackages = {...finalPackages};
+			let _finalPackages = { ...finalPackages };
 			delete _finalPackages[packageName];
 			setFinalPackages(_finalPackages);
 		}
 	};
 
 	useEffect(() => {
-
-		ipcRenderer.on("INSTALL_OUTPUT", function(ev, installOutput) {
-			console.log("Output: ", installOutput);
-		})
-
-		ipcRenderer.on("PACKAGE_STATUS_AFTER_INSTALL", function(ev, packageName, packageMessage) {
-			console.log(packageName, packageMessage);
+		ipcRenderer.on('INSTALL_OUTPUT', function (ev, installOutput) {
+			console.log('Output: ', installOutput);
 		});
+
+		ipcRenderer.on(
+			'PACKAGE_STATUS_AFTER_INSTALL',
+			function (ev, packageName, packageMessage) {
+				console.log(packageName, packageMessage);
+			},
+		);
 
 		if (packagesToInstall.length === 0) {
 			handleConfirmInstallClose();

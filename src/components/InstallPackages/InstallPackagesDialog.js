@@ -48,6 +48,7 @@ export default function InstallPackagesDialog({
 	isOpen,
 	installedPackages,
 	handleClose,
+	setOpenInstallStatusModal,
 }) {
 	const classes = useStyles();
 
@@ -246,6 +247,8 @@ export default function InstallPackagesDialog({
 						packagesToInstall,
 						setPackagesToInstall,
 						handleConfirmInstallClose,
+						handlePackageModalClose: handleClose,
+						setOpenInstallStatusModal
 					}}
 				/>
 			</Dialog>

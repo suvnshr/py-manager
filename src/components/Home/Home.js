@@ -30,6 +30,8 @@ function Home() {
 		false,
 	);
 
+	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
+
 	const handleEnvAdditionDialogClose = ev => {
 		setEnvAdditionModalOpen(false);
 	};
@@ -204,6 +206,7 @@ function Home() {
 				isOpen={packageInstallModalOpen}
 				installedPackages={packages}
 				handleClose={handlePackageInstallModalClose}
+				setOpenInstallStatusModal={setOpenInstallStatusModal}
 			/>
 		</div>
 	);
