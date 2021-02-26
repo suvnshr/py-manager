@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
+
 import {
-	Dialog,
-	DialogActions,
-	DialogTitle,
-	DialogContent,
-	List,
-	Grid,
 	Button,
 	CircularProgress,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Grid,
+	List,
 } from '@material-ui/core';
 
 import { SlideDialogTransition } from '../../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
+
 const { ipcRenderer } = window.require('electron');
 
 export default function InstallConfirmDialog({
@@ -50,16 +52,7 @@ export default function InstallConfirmDialog({
 	};
 
 	useEffect(() => {
-		ipcRenderer.on('INSTALL_OUTPUT', function (ev, installOutput) {
-			console.log('Output: ', installOutput);
-		});
 
-		ipcRenderer.on(
-			'PACKAGE_STATUS_AFTER_INSTALL',
-			function (ev, packageName, packageMessage) {
-				console.log(packageName, packageMessage);
-			},
-		);
 
 		if (packagesToInstall.length === 0) {
 			handleConfirmInstallClose();

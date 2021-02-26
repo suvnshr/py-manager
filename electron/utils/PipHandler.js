@@ -143,16 +143,18 @@ class PipHandler {
 					(_error, _stdout, _stderr) => {
 
 						let message = "";
+						let error = false; 
 
 						if(stderr.includes("Package(s) not found:")) {
 							message = "Error installing";
+							error = true;
 						}
 						
 						else {
 							message = `${packageName}v${packageVersion} was successfully installed.`;
 						}
 
-						mainWindow.send('PACKAGE_STATUS_AFTER_INSTALL', packageName, message);
+						mainWindow.send('PACKAGE_STATUS_AFTER_INSTALL', packageName, message, error);
 
 					},
 				);

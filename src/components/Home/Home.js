@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { FaPython } from 'react-icons/fa';
+
 import {
-	TextField,
-	Grid,
+	Button,
 	CircularProgress,
 	Container,
-	InputAdornment,
-	MenuItem,
-	Button,
-	ListItemIcon,
-	Typography,
 	Divider,
+	Grid,
+	InputAdornment,
+	ListItemIcon,
+	MenuItem,
+	TextField,
+	Typography,
 } from '@material-ui/core';
+import { Add, SearchOutlined } from '@material-ui/icons';
+
+import InstallPackagesStatus from '../InstallPackages/InstallingModal';
+import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
+import EnvAdditionModal from './EnvAdditionModal';
 // import eventNames from '../commons/eventNames';
 import PackageCard from './PackageCard';
-import EnvAdditionModal from './EnvAdditionModal';
-import { Add, Pages, SearchOutlined } from '@material-ui/icons';
-import { FaPython } from 'react-icons/fa';
-import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
+
 const { ipcRenderer } = window.require('electron');
 
 const ENVS = ['main', '1234567890'];
@@ -31,6 +36,10 @@ function Home() {
 	);
 
 	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
+
+	const handleInstallStatusClose = ev => {
+		setOpenInstallStatusModal(false)
+	}
 
 	const handleEnvAdditionDialogClose = ev => {
 		setEnvAdditionModalOpen(false);
@@ -50,6 +59,8 @@ function Home() {
 		ipcRenderer.on('SEND_PACKAGES', function (ev, packagesData) {
 			setPackages(packagesData);
 		});
+
+		
 	}, []);
 
 	const handleEnvChange = ev => {
@@ -208,6 +219,11 @@ function Home() {
 				handleClose={handlePackageInstallModalClose}
 				setOpenInstallStatusModal={setOpenInstallStatusModal}
 			/>
+
+			<InstallPackagesStatus
+				isOpen={openInstallStatusModal}
+				handleClose={handleInstallStatusClose}
+			/>			
 		</div>
 	);
 }
