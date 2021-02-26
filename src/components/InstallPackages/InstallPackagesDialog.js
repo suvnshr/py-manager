@@ -51,9 +51,9 @@ export default function InstallPackagesDialog({
 }) {
 	const classes = useStyles();
 
-	// Search data 
+	// Search data
 	const [searchedPackages, setSearchedPackages] = useState(null);
-	
+
 	// set to `true` when search request is sent to electron
 	// set to `false` initially and after search data is received from electron
 	const [packageLoading, setPackageLoading] = useState(false);
@@ -63,6 +63,7 @@ export default function InstallPackagesDialog({
 
 	// Whether `InstallConfirmDialog` is open or not
 	const [confirmInstall, setConfirmInstall] = useState(false);
+
 
 	// Show search results when search data is received from electron
 	useEffect(() => {
@@ -80,17 +81,16 @@ export default function InstallPackagesDialog({
 		reValidateMode: 'onSubmit',
 	});
 
-	
 	// Opens the `InstallConfirmDialog`
 	const showInstallConfirmDialog = ev => {
 		setConfirmInstall(true);
 	};
-	
+
 	// Closes the `InstallConfirmDialog`
 	const handleConfirmInstallClose = ev => {
 		setConfirmInstall(false);
 	};
-	
+
 	// Request electron to search `pypi.org`
 	const formSubmit = formData => {
 		console.log(formData);
@@ -104,10 +104,9 @@ export default function InstallPackagesDialog({
 		}
 	};
 
-	// Generates components to be shown to represent the search results 
+	// Generates components to be shown to represent the search results
 	// ...and the current state of the search operation.
 	const renderSearchResults = () => {
-
 		if (packageLoading) {
 			return (
 				<Grid container justify="center" style={{ height: '80vh' }}>
@@ -115,7 +114,6 @@ export default function InstallPackagesDialog({
 				</Grid>
 			);
 		} else if (searchedPackages !== null) {
-
 			if (searchedPackages === -1) {
 				return <div>Error occurred while searching.</div>;
 			}
@@ -131,7 +129,6 @@ export default function InstallPackagesDialog({
 						packageDescription={searchedPackages[packageName]}
 						{...{
 							packageName,
-							index,
 							packagesToInstall,
 							setPackagesToInstall,
 							installedPackages,
@@ -243,11 +240,10 @@ export default function InstallPackagesDialog({
 						</Grid>
 					</Grid>
 				</Container>
-				{/* ['Django', 'six', 'name'] */}
 				<InstallConfirmDialog
 					open={confirmInstall}
 					{...{
-						packagesToInstall, // ['Django', 'six']
+						packagesToInstall,
 						setPackagesToInstall,
 						handleConfirmInstallClose,
 					}}

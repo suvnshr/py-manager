@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
 	Dialog,
 	DialogActions,
@@ -10,9 +10,9 @@ import {
 	CircularProgress,
 } from '@material-ui/core';
 
-import axios from 'axios';
 import { SlideDialogTransition } from '../../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
+const {ipcRenderer} = window.require("electron");
 
 export default function InstallConfirmDialog({
 	open,
@@ -20,35 +20,45 @@ export default function InstallConfirmDialog({
 	setPackagesToInstall,
 	handleConfirmInstallClose,
 }) {
-	const [packagesToInstallData, setPackagesToInstallData] = useState([]);
+	const [finalPackages, setFinalPackages] = useState({});
 
-	const installPackages = () => {};
+	const getFinalPackages = _ => ({ ...finalPackages });
+
+	const installPackages = () => {
+		console.log('Packages to Install:', finalPackages);
+
+		ipcRenderer.invoke("PACKAGES_INSTALL", finalPackages);
+
+	};
 
 	// Removes a package from `packagesToInstall`
-	const removePackageFromInstallList = packageName => {};
+	const removePackageFromInstallList = packageName => {
+		let _newPackagesToInstall = [...packagesToInstall];
+		const indexOfPackage = _newPackagesToInstall.indexOf(packageName);
 
-	// Populates the `packagesToInstallData`
-	const populatePackageData = () => {
-		packagesToInstall.forEach((packageName, index) => {
-			let _newPackagesToInstallData = {};
+		if (indexOfPackage !== -1) {
+			_newPackagesToInstall.splice(indexOfPackage, 1);
+			setPackagesToInstall(_newPackagesToInstall);
 
-			axios.get(`https://pypi.org/pypi/${packageName}/json`).then(res => {
-				_newPackagesToInstallData[packageName] = {
-					versions: Object.keys(res.data.releases),
-					latestVersion: res.data.info.version,
-				};
-
-				if (index === packagesToInstall.length - 1) {
-					setPackagesToInstallData(_newPackagesToInstallData);
-				}
-			});
-		});
+			let _finalPackages = {...finalPackages};
+			delete _finalPackages[packageName];
+			setFinalPackages(_finalPackages);
+		}
 	};
 
 	useEffect(() => {
 
-		populatePackageData();
+		ipcRenderer.on("INSTALL_OUTPUT", function(ev, installOutput) {
+			console.log("Output: ", installOutput);
+		})
 
+		ipcRenderer.on("PACKAGE_STATUS_AFTER_INSTALL", function(ev, packageName, packageMessage) {
+			console.log(packageName, packageMessage);
+		});
+
+		if (packagesToInstall.length === 0) {
+			handleConfirmInstallClose();
+		}
 	}, [packagesToInstall]);
 
 	return (
@@ -63,20 +73,20 @@ export default function InstallConfirmDialog({
 			<DialogTitle>Choose package version</DialogTitle>
 			<DialogContent>
 				<List>
-					{Object.keys(packagesToInstallData).length === 0 ? (
+					{packagesToInstall.length === 0 ? (
 						<Grid container justify="center">
 							<CircularProgress />
 						</Grid>
 					) : (
-						Object.entries(
-							packagesToInstallData,
-						).map(([packageName, packageData], index) => (
+						packagesToInstall.map((packageName, index) => (
 							<InstallConfirmPackageListItem
-								packageName={packageName}
-								packageData={packageData}
-								removePackageFromInstallList={
-									removePackageFromInstallList
-								}
+								key={`install-confirm-package-list-item-${packageName}-${index}`}
+								{...{
+									packageName,
+									removePackageFromInstallList,
+									getFinalPackages,
+									setFinalPackages,
+								}}
 							/>
 						))
 					)}

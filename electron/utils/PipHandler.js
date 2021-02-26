@@ -74,7 +74,6 @@ class PipHandler {
 
 				// a.package-snippet's
 				for (const packageAnchorTag of $('a.package-snippet')) {
-					
 					// a.package-snippet > h3.package-snippet__title > span.package-snippet__name
 					const packageName =
 						packageAnchorTag.children[1].children[1].children[0]
@@ -103,23 +102,61 @@ class PipHandler {
 	}
 
 	uninstallPackage(mainWindow, packageName) {
-
 		const PIP = this.getPip();
 
-		exec(`${PIP} uninstall ${packageName} --yes`, (error, stdout, stderr) => {
+		exec(
+			`${PIP} uninstall ${packageName} --yes`,
+			(error, stdout, stderr) => {
+				let uninstallMessage = `${packageName} is successfully removed`;
 
-			let uninstallMessage = `${packageName} is successfully removed`;
-			
-			if(error) {
-				uninstallMessage = `Error while uninstalling ${packageName}: ${error}`
-			}
-			
-			if(stderr) {
-				uninstallMessage = `Error while uninstalling ${packageName}: ${stderr}`;
-			}
-			
-			mainWindow.webContents.send('UNINSTALL_MESSAGE', uninstallMessage);
+				if (error) {
+					uninstallMessage = `Error while uninstalling ${packageName}: ${error}`;
+				}
 
+				if (stderr) {
+					uninstallMessage = `Error while uninstalling ${packageName}: ${stderr}`;
+				}
+
+				mainWindow.webContents.send(
+					'UNINSTALL_MESSAGE',
+					uninstallMessage,
+				);
+			},
+		);
+	}
+
+	installPackage(mainWindow, packagesData) {
+
+		let installCommand = "";
+
+		Object.entries(packagesData).forEach(([packageName, packageVersion]) => installCommand += ` ${packageName}==${packageVersion}`)
+		
+		const PIP = this.getPip();
+		installCommand = PIP + ' install' + installCommand;
+
+		exec(installCommand, (error, stdout, stderr) => {
+			mainWindow.send('INSTALL_OUTPUT', stdout);
+
+			Object.entries(packagesData).forEach(([packageName, packageVersion]) => {
+				exec(
+					`${PIP} show ${packageName}`,
+					(_error, _stdout, _stderr) => {
+
+						let message = "";
+
+						if(stderr.includes("Package(s) not found:")) {
+							message = "Error installing";
+						}
+						
+						else {
+							message = `${packageName}v${packageVersion} was successfully installed.`;
+						}
+
+						mainWindow.send('PACKAGE_STATUS_AFTER_INSTALL', packageName, message);
+
+					},
+				);
+			});
 		});
 	}
 }

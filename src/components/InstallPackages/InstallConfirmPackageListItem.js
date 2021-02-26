@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+import axios from 'axios';
 
 import {
 	ListItem,
@@ -10,62 +12,92 @@ import {
 	InputLabel,
 	Select,
 	MenuItem,
+	CircularProgress,
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 
 export default function InstallConfirmPackageListItem({
 	packageName,
-	packageData,
 	removePackageFromInstallList,
+	getFinalPackages,
+	setFinalPackages,
 }) {
+	const [currentVersion, setCurrentVersion] = useState(null);
+	const [packageData, setPackageData] = useState([]);
 
-	const [currentVersion, setCurrentVersion] = useState(
-		packageData.latestVersion,
-	);
+	const [loading, setLoading] = useState(true);
 
 	const handleVersionChange = ev => {
 		setCurrentVersion(ev.target.value);
 	};
 
+	useEffect(() => {
+		const fetchPackageData = async () => {
+			await axios
+				.get(`https://pypi.org/pypi/${packageName}/json`)
+				.then(res => {
+					const latestVersion = res.data.info.version;
+
+					setPackageData(res.data);
+					setCurrentVersion(latestVersion);
+					setLoading(false);
+				});
+		};
+
+		fetchPackageData();
+	}, []);
+
+	useEffect(() => {
+		if (currentVersion !== null) {
+			let _finalPackages = getFinalPackages();
+			_finalPackages[packageName] = currentVersion;
+
+			setFinalPackages(_finalPackages);
+		}
+	}, [currentVersion]);
+
+	const loader = <CircularProgress size={25} />;
+
 	return (
 		<ListItem divider>
-			<ListItemIcon>
-				<IconButton
-					edge="start"
-					onClick={() =>
-						removePackageFromInstallList(packageName)
-					}
-				>
-					<Delete />
+			<ListItemIcon
+				onClick={
+					!loading
+						? () => removePackageFromInstallList(packageName)
+						: null
+				}
+			>
+				<IconButton edge="start">
+					{loading ? loader : <Delete />}
 				</IconButton>
 			</ListItemIcon>
 
-			<ListItemText
-				primary={packageName}
-				// secondary={packageData.summary}
-				// secondaryTypographyProps={{
-				// 	noWrap: true,
-				// }}
-			/>
+			<ListItemText primary={packageName} />
 
 			<ListItemSecondaryAction>
-				<FormControl>
-					<InputLabel>Version</InputLabel>
+				{loading ? (
+					loader
+				) : (
+					<FormControl>
+						<InputLabel>Version</InputLabel>
 
-					<Select
-						value={currentVersion}
-						onChange={handleVersionChange}
-					>
-						{packageData.versions.map((version, index) => (
-							<MenuItem
-								key={`version-item-${packageName}-${index}`}
-								value={version}
-							>
-								{version}
-							</MenuItem>
-						))}
-					</Select>
-				</FormControl>
+						<Select
+							value={currentVersion}
+							onChange={handleVersionChange}
+						>
+							{Object.keys(packageData.releases).map(
+								(version, index) => (
+									<MenuItem
+										key={`install-confirm-version-item-${packageName}-${index}`}
+										value={version}
+									>
+										{version}
+									</MenuItem>
+								),
+							)}
+						</Select>
+					</FormControl>
+				)}
 			</ListItemSecondaryAction>
 		</ListItem>
 	);

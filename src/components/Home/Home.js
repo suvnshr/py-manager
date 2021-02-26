@@ -130,8 +130,8 @@ function Home() {
 									),
 								}}
 							>
-								{ENVS.map(option => (
-									<MenuItem key={option} value={option}>
+								{ENVS.map((option, index) => (
+									<MenuItem key={`env-menu-item-${index}`} value={option}>
 										{option}
 									</MenuItem>
 								))}

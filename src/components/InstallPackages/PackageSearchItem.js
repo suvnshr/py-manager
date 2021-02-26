@@ -17,7 +17,6 @@ import { useHistory } from 'react-router-dom';
 export default function PackageSearchItem({
 	packageName,
 	packageDescription,
-	index,
 	packagesToInstall,
 	setPackagesToInstall,
 	installedPackages,
@@ -49,13 +48,10 @@ export default function PackageSearchItem({
 			let _newPackagesToInstall = [...packagesToInstall, packageName];
 			setPackagesToInstall(_newPackagesToInstall);
 
-			setChecked(true);
 		} else {
 			let _packagesToInstall = [...packagesToInstall];
 			_packagesToInstall.splice(indexOfPackage, 1);
 			setPackagesToInstall(_packagesToInstall);
-
-			setChecked(false);
 		}
 	};
 
@@ -79,7 +75,6 @@ export default function PackageSearchItem({
 			disableRipple
 			divider={true}
 			button
-			key={`package-search-item-${index}`}
 		>
 			<ListItemIcon>
 				<FormControl>

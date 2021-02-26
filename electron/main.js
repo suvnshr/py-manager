@@ -69,3 +69,8 @@ ipcMain.handle('SEARCH_ONLINE', function (ev, packageQuery) {
 ipcMain.handle('PACKAGE_UNINSTALL', function (ev, packageName) {
 	pipPackagesHandler.uninstallPackage(mainWindow, packageName);
 });
+
+
+ipcMain.handle('PACKAGES_INSTALL', function (ev, packagesData) {
+	pipPackagesHandler.installPackage(mainWindow, packagesData);
+});
