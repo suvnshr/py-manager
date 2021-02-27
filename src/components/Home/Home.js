@@ -14,12 +14,17 @@ import {
 	TextField,
 	Typography,
 } from '@material-ui/core';
-import { Add, SearchOutlined } from '@material-ui/icons';
+import {
+	Add,
+	Delete,
+	GetApp,
+	GetAppOutlined,
+	SearchOutlined,
+} from '@material-ui/icons';
 
-import InstallPackagesStatus from '../InstallPackages/InstallingModal';
+import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
 import EnvAdditionModal from './EnvAdditionModal';
-// import eventNames from '../commons/eventNames';
 import PackageCard from './PackageCard';
 
 const { ipcRenderer } = window.require('electron');
@@ -38,8 +43,8 @@ function Home() {
 	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
 
 	const handleInstallStatusClose = ev => {
-		setOpenInstallStatusModal(false)
-	}
+		setOpenInstallStatusModal(false);
+	};
 
 	const handleEnvAdditionDialogClose = ev => {
 		setEnvAdditionModalOpen(false);
@@ -59,8 +64,6 @@ function Home() {
 		ipcRenderer.on('SEND_PACKAGES', function (ev, packagesData) {
 			setPackages(packagesData);
 		});
-
-		
 	}, []);
 
 	const handleEnvChange = ev => {
@@ -109,81 +112,87 @@ function Home() {
 			<Grid container>
 				<Grid item sm={3} md={3} lg={4} />
 				<Grid item xs={12} sm={6} md={6} lg={4}>
-					<p />
-					<Grid container justify="center">
-						<Grid item style={{ flex: 1 }}>
-							<TextField
-								fullWidth={true}
-								onKeyUp={performSearch}
-								label="Search local packages"
-								variant="outlined"
-								InputProps={{
-									startAdornment: (
-										<InputAdornment position="start">
-											<SearchOutlined color="primary" />
-										</InputAdornment>
-									),
-								}}
-							/>
-						</Grid>
+					<div>
+						<p />
+						<Grid container justify="center">
+							<Grid item style={{ flex: 1 }}>
+								<TextField
+									fullWidth={true}
+									onKeyUp={performSearch}
+									label="Search local packages"
+									variant="outlined"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<SearchOutlined color="primary" />
+											</InputAdornment>
+										),
+									}}
+								/>
+							</Grid>
 
-						<Grid item>
-							<TextField
-								select
-								label="Env"
-								value={env}
-								fullWidth={true}
-								onChange={handleEnvChange}
-								variant="outlined"
-								InputProps={{
-									startAdornment: (
-										<InputAdornment position="start">
-											<FaPython color="primary" />
-										</InputAdornment>
-									),
-								}}
-							>
-								{ENVS.map((option, index) => (
-									<MenuItem key={`env-menu-item-${index}`} value={option}>
-										{option}
+							<Grid item>
+								<TextField
+									select
+									label="Env"
+									value={env}
+									fullWidth={true}
+									onChange={handleEnvChange}
+									variant="outlined"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<FaPython color="primary" />
+											</InputAdornment>
+										),
+									}}
+								>
+									{ENVS.map((option, index) => (
+										<MenuItem
+											key={`env-menu-item-${index}`}
+											value={option}
+										>
+											{option}
+										</MenuItem>
+									))}
+
+									<Divider light />
+
+									<MenuItem value={null}>
+										<ListItemIcon>
+											<Add />
+										</ListItemIcon>
+
+										<Typography
+											variant="inherit"
+											align="center"
+										>
+											Add Env
+										</Typography>
 									</MenuItem>
-								))}
-
-								<Divider light />
-
-								<MenuItem value={null}>
-									<ListItemIcon>
-										<Add />
-									</ListItemIcon>
-
-									<Typography
-										variant="inherit"
-										align="center"
-									>
-										Add Env
-									</Typography>
-								</MenuItem>
-							</TextField>
+								</TextField>
+							</Grid>
 						</Grid>
-					</Grid>
+						<p />
+					</div>
+
+					<p />
+					{packages !== null ? (
+						<Grid justify="center" container>
+							<Button
+								variant="contained"
+								color="secondary"
+								onClick={handlePackageInstall}
+								startIcon={<GetApp />}
+							>
+								Install
+							</Button>
+						</Grid>
+					) : null}
+
 					<p />
 				</Grid>
 			</Grid>
-
-			<p />
-			{packages !== null ? (
-				<Grid justify="center" container>
-					<Button
-						variant="contained"
-						color="secondary"
-						onClick={handlePackageInstall}
-					>
-						Install Packages
-					</Button>
-				</Grid>
-			) : null}
-
-			<p />
 
 			<Divider light />
 
@@ -223,7 +232,7 @@ function Home() {
 			<InstallPackagesStatus
 				isOpen={openInstallStatusModal}
 				handleClose={handleInstallStatusClose}
-			/>			
+			/>
 		</div>
 	);
 }

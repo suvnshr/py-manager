@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
 	Typography,
 	makeStyles,
@@ -33,24 +33,25 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 	const classes = useStyles();
 	const history = useHistory();
 
-	const [uninstallPromptShowed, setUninstallPromptShowed] = useState(false);
-
 	const goBack = ev => {
 		history.push(routes.HOME);
 	};
 
 	useEffect(() => {
+
+		let uninstallPromptShowed = false;
+
 		if (!uninstallPromptShowed) {
 		
 			ipcRenderer.on(
 				'UNINSTALL_MESSAGE',
 				function (ev, uninstallMessage) {
 					window.alert(uninstallMessage);
+					uninstallPromptShowed = true;
 					goBack();
 				},
 			);
 
-			setUninstallPromptShowed(true);
 		}
 	}, []);
 

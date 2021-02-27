@@ -126,39 +126,55 @@ class PipHandler {
 	}
 
 	installPackage(mainWindow, packagesData) {
+		let installCommand = '';
 
-		let installCommand = "";
+		Object.entries(packagesData).forEach(
+			([packageName, packageVersion]) =>
+				(installCommand += ` ${packageName}==${packageVersion}`),
+		);
 
-		Object.entries(packagesData).forEach(([packageName, packageVersion]) => installCommand += ` ${packageName}==${packageVersion}`)
-		
 		const PIP = this.getPip();
 		installCommand = PIP + ' install' + installCommand;
 
 		exec(installCommand, (error, stdout, stderr) => {
 			mainWindow.send('INSTALL_OUTPUT', stdout);
 
-			Object.entries(packagesData).forEach(([packageName, packageVersion]) => {
-				exec(
-					`${PIP} show ${packageName}`,
-					(_error, _stdout, _stderr) => {
+			let packageInstallStatus = {};
 
-						let message = "";
-						let error = false; 
+			Object.entries(packagesData).forEach(
+				([packageName, packageVersion]) => {
+					exec(
+						`${PIP} show ${packageName}`,
+						(_error, _stdout, _stderr) => {
+							let message = '';
+							let error = false;
 
-						if(stderr.includes("Package(s) not found:")) {
-							message = "Error installing";
-							error = true;
-						}
-						
-						else {
-							message = `${packageName}v${packageVersion} was successfully installed.`;
-						}
+							if (stderr.includes('Package(s) not found:')) {
+								message = `Error installing ${packageName}`;
+								error = true;
+							} else {
+								message = `${packageName} ${packageVersion} was successfully installed.`;
+							}
 
-						mainWindow.send('PACKAGE_STATUS_AFTER_INSTALL', packageName, message, error);
+							packageInstallStatus[packageName] = {
+								packageVersion,
+								message,
+								error,
+							};
 
-					},
-				);
-			});
+							if (
+								Object.keys(packageInstallStatus).length ===
+								Object.keys(packagesData).length
+							) {
+								mainWindow.send(
+									'PACKAGE_STATUS_AFTER_INSTALL',
+									packageInstallStatus,
+								);
+							}
+						},
+					);
+				},
+			);
 		});
 	}
 }

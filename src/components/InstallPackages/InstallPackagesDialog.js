@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SearchOutlined, Close } from '@material-ui/icons';
+import { SearchOutlined, Close, Search } from '@material-ui/icons';
 
 import {
 	CircularProgress,
@@ -16,10 +16,7 @@ import {
 	Toolbar,
 	IconButton,
 	Typography,
-	Slide,
 } from '@material-ui/core';
-
-import { FaPython } from 'react-icons/fa';
 
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -94,7 +91,6 @@ export default function InstallPackagesDialog({
 
 	// Request electron to search `pypi.org`
 	const formSubmit = formData => {
-		console.log(formData);
 
 		const { packageQuery } = formData;
 
@@ -164,6 +160,7 @@ export default function InstallPackagesDialog({
 				open={isOpen}
 				onClose={handleClose}
 				TransitionComponent={SlideDialogTransition}
+				disableBackdropClick={true}
 			>
 				<AppBar className={classes.appBar}>
 					<Toolbar>
@@ -229,8 +226,9 @@ export default function InstallPackagesDialog({
 										type="submit"
 										variant="contained"
 										color="secondary"
+										startIcon={<Search />}
 									>
-										Search packages
+										Search
 									</Button>
 								</Grid>
 							</form>

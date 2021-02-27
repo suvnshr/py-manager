@@ -9,10 +9,13 @@ import {
 	DialogTitle,
 	Grid,
 	List,
+	Typography,
 } from '@material-ui/core';
 
 import { SlideDialogTransition } from '../../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
+import { GetApp } from '@material-ui/icons';
+import customTheme from '../../commons/theme';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -29,7 +32,6 @@ export default function InstallConfirmDialog({
 	const getFinalPackages = _ => ({ ...finalPackages });
 
 	const installPackages = () => {
-		console.log('Packages to Install:', finalPackages);
 		ipcRenderer.invoke('PACKAGES_INSTALL', finalPackages);
 		handleConfirmInstallClose();
 		handlePackageModalClose();
@@ -52,8 +54,6 @@ export default function InstallConfirmDialog({
 	};
 
 	useEffect(() => {
-
-
 		if (packagesToInstall.length === 0) {
 			handleConfirmInstallClose();
 		}
@@ -68,7 +68,12 @@ export default function InstallConfirmDialog({
 			maxWidth={'sm'}
 			onClose={handleConfirmInstallClose}
 		>
-			<DialogTitle>Choose package version</DialogTitle>
+			<DialogTitle>
+				<div>Choose version</div>
+			<Typography variant="subtitle2" style={{color: customTheme.palette.grey[400]}}>
+				&nbsp;By default the latest versions are selected
+			</Typography>
+			</DialogTitle>
 			<DialogContent>
 				<List>
 					{packagesToInstall.length === 0 ? (
@@ -92,15 +97,16 @@ export default function InstallConfirmDialog({
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={handleConfirmInstallClose} color="primary">
-					Back
+					Cancel
 				</Button>
 				<Button
 					onClick={installPackages}
 					color="primary"
 					variant="contained"
 					color="primary"
+					startIcon={<GetApp />}
 				>
-					Install packages
+					Install all
 				</Button>
 			</DialogActions>
 		</Dialog>

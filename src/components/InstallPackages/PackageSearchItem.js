@@ -105,7 +105,9 @@ export default function PackageSearchItem({
 			/>
 
 			<ListItemSecondaryAction>
-				<IconButton edge="end">
+				<IconButton edge="end"
+					onClick={_isPackageInstalled ? goToDetailPage : null}
+				>
 					{_isPackageInstalled ? (
 						<InfoOutlined
 							onClick={goToDetailPage}
