@@ -74,3 +74,8 @@ ipcMain.handle('PACKAGE_UNINSTALL', function (ev, packageName) {
 ipcMain.handle('PACKAGES_INSTALL', function (ev, packagesData) {
 	pipPackagesHandler.installPackage(mainWindow, packagesData);
 });
+
+
+ipcMain.handle('OPEN_LINK', function (ev, URL) {
+	pipPackagesHandler.openURLInBrowser(URL);
+});

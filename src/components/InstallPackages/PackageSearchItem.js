@@ -13,10 +13,11 @@ import { InfoOutlined, OpenInNewOutlined } from '@material-ui/icons';
 import { isPackageInstalled } from '../../commons/helpers';
 import routes from '../../commons/routes';
 import { useHistory } from 'react-router-dom';
+const { ipcRenderer } = window.require('electron');
 
 export default function PackageSearchItem({
 	packageName,
-	packageDescription,
+	packageData,
 	packagesToInstall,
 	setPackagesToInstall,
 	installedPackages,
@@ -34,6 +35,11 @@ export default function PackageSearchItem({
 		history.push(routes.PACKAGE_DETAIL + packageName);
 	};
 
+	// Navigate to package's detail page on PYPI
+	const goToPyPIDetailPage = ev => {
+		ipcRenderer.invoke('OPEN_LINK', packageData.href);
+	};
+
 	// Whether the package is selected by user for installation
 	const [_checked, setChecked] = useState(
 		packagesToInstall.indexOf(packageName) !== -1,
@@ -47,14 +53,12 @@ export default function PackageSearchItem({
 		if (indexOfPackage === -1) {
 			let _newPackagesToInstall = [...packagesToInstall, packageName];
 			setPackagesToInstall(_newPackagesToInstall);
-
 		} else {
 			let _packagesToInstall = [...packagesToInstall];
 			_packagesToInstall.splice(indexOfPackage, 1);
 			setPackagesToInstall(_packagesToInstall);
 		}
 	};
-
 
 	// If the user removes the package from `InstallConfirmDialog`
 	// then this function will unselect the package
@@ -71,11 +75,7 @@ export default function PackageSearchItem({
 	useEffect(syncInstalledPackagesWithSelection, [packagesToInstall]);
 
 	return (
-		<ListItem
-			disableRipple
-			divider={true}
-			button
-		>
+		<ListItem disableRipple divider={true} button>
 			<ListItemIcon>
 				<FormControl>
 					{_isPackageInstalled ? (
@@ -101,18 +101,20 @@ export default function PackageSearchItem({
 			</ListItemIcon>
 			<ListItemText
 				primary={packageName}
-				secondary={packageDescription}
+				secondary={packageData.packageDescription}
 			/>
 
 			<ListItemSecondaryAction>
-				<IconButton edge="end"
-					onClick={_isPackageInstalled ? goToDetailPage : null}
+				<IconButton
+					edge="end"
+					onClick={
+						_isPackageInstalled
+							? goToDetailPage
+							: goToPyPIDetailPage
+					}
 				>
 					{_isPackageInstalled ? (
-						<InfoOutlined
-							onClick={goToDetailPage}
-							fontSize="small"
-						/>
+						<InfoOutlined fontSize="small" />
 					) : (
 						<OpenInNewOutlined fontSize="small" />
 					)}

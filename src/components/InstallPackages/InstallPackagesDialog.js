@@ -123,7 +123,7 @@ export default function InstallPackagesDialog({
 				(packageName, index) => (
 					<PackageSearchItem
 						key={`package-search-item-${index}`}
-						packageDescription={searchedPackages[packageName]}
+						packageData={searchedPackages[packageName]}
 						{...{
 							packageName,
 							packagesToInstall,

@@ -2,10 +2,17 @@ const { exec } = require('child_process');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+const {shell} = require("electron");
+
 class PipHandler {
 	// getting pip reference
 	getPip() {
 		return 'pip3';
+	}
+
+	// open URL in browser
+	openURLInBrowser(URL) {
+		shell.openExternal(URL);
 	}
 
 	// getting installed packages
@@ -90,7 +97,13 @@ class PipHandler {
 							packageDescriptionPTag.children[0].data;
 					}
 
-					matchedPackages[packageName] = packageDescription;
+					let pypiPackageData = {
+						href:
+							'https://pypi.org' + packageAnchorTag.attribs.href,
+						packageDescription,
+					};
+
+					matchedPackages[packageName] = pypiPackageData;
 				}
 
 				mainWindow.webContents.send('SEARCH_DATA', matchedPackages);
