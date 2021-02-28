@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SearchOutlined, Close, Search } from '@material-ui/icons';
+import { SearchOutlined, Close, Search, FilterList } from '@material-ui/icons';
 
 import {
 	CircularProgress,
@@ -16,6 +16,11 @@ import {
 	Toolbar,
 	IconButton,
 	Typography,
+	MenuItem,
+	FormControl,
+	InputLabel,
+	Select,
+	Chip,
 } from '@material-ui/core';
 
 import { useForm } from 'react-hook-form';
@@ -41,6 +46,7 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
+const filterOptions = ['Relevance', 'Trending', 'Recent'];
 export default function InstallPackagesDialog({
 	isOpen,
 	installedPackages,
@@ -52,6 +58,9 @@ export default function InstallPackagesDialog({
 	// Search data
 	const [searchedPackages, setSearchedPackages] = useState(null);
 
+	// Search filter
+	const [filter, setFilter] = useState(filterOptions[0]);
+
 	// set to `true` when search request is sent to electron
 	// set to `false` initially and after search data is received from electron
 	const [packageLoading, setPackageLoading] = useState(false);
@@ -62,21 +71,21 @@ export default function InstallPackagesDialog({
 	// Whether `InstallConfirmDialog` is open or not
 	const [confirmInstall, setConfirmInstall] = useState(false);
 
-
 	// Show search results when search data is received from electron
 	useEffect(() => {
 		ipcRenderer.on('SEARCH_DATA', function (ev, matchedPackages) {
 			setSearchedPackages(matchedPackages);
+			console.log(matchedPackages);
 			setPackageLoading(false);
 		});
 	}, []);
 
 	// `react-hook-form` initialization options
-	const { register, handleSubmit, errors } = useForm({
+	const { register, handleSubmit, errors, getValues } = useForm({
 		resolver: yupResolver(Schema),
 		criteriaMode: 'firstError',
 		mode: 'onSubmit',
-		reValidateMode: 'onSubmit',
+		reValidateMode: 'onChange',
 	});
 
 	// Opens the `InstallConfirmDialog`
@@ -89,17 +98,23 @@ export default function InstallPackagesDialog({
 		setConfirmInstall(false);
 	};
 
+	const handleFilterChange = ev => {
+		setFilter(ev.target.value);
+	};
+
 	// Request electron to search `pypi.org`
 	const formSubmit = formData => {
-
 		const { packageQuery } = formData;
 
-		setPackageLoading(true);
-
 		if (packageQuery) {
-			ipcRenderer.invoke('SEARCH_ONLINE', packageQuery);
+			setPackageLoading(true);
+			ipcRenderer.invoke('SEARCH_ONLINE', packageQuery, filter);
 		}
 	};
+
+	useEffect(() => {
+		formSubmit(getValues(['packageQuery']));
+	}, [filter]);
 
 	// Generates components to be shown to represent the search results
 	// ...and the current state of the search operation.
@@ -112,11 +127,17 @@ export default function InstallPackagesDialog({
 			);
 		} else if (searchedPackages !== null) {
 			if (searchedPackages === -1) {
-				return <div>Error occurred while searching.</div>;
+				return (
+					<Typography align="center">
+						Error occurred while searching.
+					</Typography>
+				);
 			}
 
-			if (Object.keys(searchedPackages) === 0) {
-				return <div> No packages found</div>;
+			if (Object.keys(searchedPackages).length === 0) {
+				return (
+					<Typography align="center"> No packages found</Typography>
+				);
 			}
 
 			const listItems = Object.keys(searchedPackages).map(
@@ -140,10 +161,34 @@ export default function InstallPackagesDialog({
 					<Divider />
 					<p />
 
-					{/* Packages count */}
-					<Typography align="right" variant="subtitle2">
-						{Object.keys(searchedPackages).length} packages found
-					</Typography>
+					<Grid container justify="space-between" alignItems="center">
+						<Grid item>
+							<FormControl>
+								<InputLabel>Order By</InputLabel>
+								<Select
+									value={filter}
+									onChange={handleFilterChange}
+								>
+									{filterOptions.map((filterItem, index) => (
+										<MenuItem
+											key={`select-${filterItem}-${index}`}
+											value={filterItem}
+										>
+											{filterItem}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</Grid>
+						<Grid item>
+							<Chip
+								label={`${
+									Object.keys(searchedPackages).length
+								} packages
+								found`}
+							/>
+						</Grid>
+					</Grid>
 					<p />
 
 					{/* Search results */}
@@ -246,7 +291,7 @@ export default function InstallPackagesDialog({
 						setPackagesToInstall,
 						handleConfirmInstallClose,
 						handlePackageModalClose: handleClose,
-						setOpenInstallStatusModal
+						setOpenInstallStatusModal,
 					}}
 				/>
 			</Dialog>

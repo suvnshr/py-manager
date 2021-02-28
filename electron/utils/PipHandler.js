@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const {shell} = require("electron");
+const { shell } = require('electron');
 
 class PipHandler {
 	// getting pip reference
@@ -71,9 +71,20 @@ class PipHandler {
 		});
 	}
 
-	searchPythonPackageOnline(mainWindow, packageName) {
+	searchPythonPackageOnline(mainWindow, packageName, orderBy) {
+		let filter = '';
+		const filterOptions = {
+			Relevance: '',
+			Trending: '-zscore',
+			Recent: '-created',
+		};
+
+		if (Object.keys(filterOptions).includes(orderBy)) {
+			filter = filterOptions[orderBy];
+		}
+
 		axios
-			.get(`https://pypi.org/search/?q=${packageName}`)
+			.get(`https://pypi.org/search/?q=${packageName}&o=${filter}`)
 			.then(res => {
 				const $ = cheerio.load(res.data);
 
