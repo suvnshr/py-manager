@@ -10,12 +10,13 @@ const pipPackagesHandler = new PipHandler();
 
 function createWindow() {
 	mainWindow = new BrowserWindow({
-		width: 800,
-		height: 600,
 		webPreferences: {
 			nodeIntegration: true,
 		},
 	});
+
+	// Make the application run full screen
+	mainWindow.maximize();
 
 	mainWindow.loadURL(
 		isDev
@@ -23,15 +24,13 @@ function createWindow() {
 			: `file://${path.join(__dirname, 'src/build/index.html')}`,
 	);
 
-	
 	// Install the extension if developer mode is ON
 	if (isDev) {
-
 		const {
 			default: installExtension,
 			REACT_DEVELOPER_TOOLS,
 		} = require('electron-devtools-installer');
-		
+
 		installExtension(REACT_DEVELOPER_TOOLS)
 			.then(name => console.log(name + ' added'))
 			.catch(err => console.log(err + ' occurred'));
@@ -60,21 +59,21 @@ ipcMain.handle('RECEIVE_LOCAL_DETAIL', function (ev, packageName) {
 	pipPackagesHandler.getPackageDetail(mainWindow, packageName);
 });
 
-
 ipcMain.handle('SEARCH_ONLINE', function (ev, packageQuery, orderBy) {
-	pipPackagesHandler.searchPythonPackageOnline(mainWindow, packageQuery, orderBy);
+	pipPackagesHandler.searchPythonPackageOnline(
+		mainWindow,
+		packageQuery,
+		orderBy,
+	);
 });
-
 
 ipcMain.handle('PACKAGE_UNINSTALL', function (ev, packageName) {
 	pipPackagesHandler.uninstallPackage(mainWindow, packageName);
 });
 
-
 ipcMain.handle('PACKAGES_INSTALL', function (ev, packagesData) {
 	pipPackagesHandler.installPackage(mainWindow, packagesData);
 });
-
 
 ipcMain.handle('OPEN_LINK', function (ev, URL) {
 	pipPackagesHandler.openURLInBrowser(URL);
