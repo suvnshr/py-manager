@@ -4,6 +4,7 @@ import { FaPython } from 'react-icons/fa';
 
 import {
 	Button,
+	Chip,
 	CircularProgress,
 	Container,
 	Divider,
@@ -198,10 +199,11 @@ function Home() {
 
 			<Container>
 				{packages !== null ? (
-					<div style={{ padding: 10 }}>
-						<Typography variant="subtitle1" align="left">
-							{packages.length} packages installed
-						</Typography>
+					<div style={{ padding: 5, textAlign: 'right' }}>
+						<Chip
+							component="span"
+							label={`${packages.length} packages installed`}
+						/>
 					</div>
 				) : null}
 
