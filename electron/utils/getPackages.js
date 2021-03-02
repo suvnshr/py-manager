@@ -1,5 +1,4 @@
 const getPip = require('./getPip');
-// const eventNames = require('../../commons/eventNames');
 const { exec } = require('child_process');
 
 function getPackages(mainWindow) {

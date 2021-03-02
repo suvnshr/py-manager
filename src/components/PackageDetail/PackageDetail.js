@@ -41,15 +41,10 @@ function PackageDetail() {
 				setPackageData(-1);
 			});
 
-		ipcRenderer.on(
-			'SEND_LOCAL_DETAIL',
-			function (ev, _localPackageData) {
-				setLocalPackageData(_localPackageData);
-			},
-		);
-	}, [packageName]);
+		ipcRenderer.on('SEND_LOCAL_DETAIL', function (ev, _localPackageData) {
+			setLocalPackageData(_localPackageData);
+		});
 
-	useEffect(() => {
 		if (
 			packageData !== null &&
 			localPackageData !== null &&
@@ -58,12 +53,16 @@ function PackageDetail() {
 			let _updatable = compareVersions.compare(
 				packageData.info.version,
 				localPackageData.version,
-				'>',
+				'<',
 			);
 
-			setUpdatable(_updatable);
+			setUpdatable(Boolean(_updatable));
 		}
-	}, [packageData]);
+	}, [packageName]);
+
+	// useEffect(() => {
+
+	// }, [packageData]);
 
 	const loader = (
 		<Grid
@@ -79,7 +78,9 @@ function PackageDetail() {
 	if (packageData !== null && localPackageData !== null) {
 		return (
 			<div>
-				<PackageDetailHeader {...{ packageName, updatable }} />
+				<PackageDetailHeader
+					{...{ packageName, updatable, localPackageData }}
+				/>
 
 				<PackageDetailBody
 					{...{

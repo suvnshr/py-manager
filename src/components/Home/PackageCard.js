@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import { Grid, LinearProgress } from '@material-ui/core';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-import routes from '../commons/routes';
+import routes from '../../commons/routes';
 
 const useStyles = makeStyles(theme => ({
 	root: {
