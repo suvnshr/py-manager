@@ -25,18 +25,18 @@ import {
 
 import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
-import EnvAdditionModal from './EnvAdditionModal';
+import PIPAdditionModal from './PIPAdditionModal';
 import PackageCard from './PackageCard';
 
 const { ipcRenderer } = window.require('electron');
 
-const ENVS = ['main', '1234567890'];
+const PIPS = ['main', '1234567890'];
 
 function Home() {
 	const [packages, setPackages] = useState(null);
 	const [query, setQuery] = useState('');
-	const [env, setEnv] = useState(ENVS[0]);
-	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
+	const [currentPip, setCurrentPip] = useState(PIPS[0]);
+	const [pipAdditionModalOpen, setPIPAdditionModalOpen] = useState(false);
 	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(
 		false,
 	);
@@ -47,8 +47,8 @@ function Home() {
 		setOpenInstallStatusModal(false);
 	};
 
-	const handleEnvAdditionDialogClose = ev => {
-		setEnvAdditionModalOpen(false);
+	const handlePIPAdditionDialogClose = ev => {
+		setPIPAdditionModalOpen(false);
 	};
 
 	const handlePackageInstallModalClose = ev => {
@@ -67,16 +67,17 @@ function Home() {
 		});
 	}, []);
 
-	const handleEnvChange = ev => {
+	const handlePIPChange = ev => {
 		const value = ev.target.value;
 
-		if (value !== null) setEnv(ev.target.value);
-		else handleEnvAddition(ev);
+		if (value !== null) setCurrentPip(ev.target.value);
+		else handlePIPAddition(ev);
 	};
 
-	const handleEnvAddition = ev => {
-		setEnvAdditionModalOpen(true);
+	const handlePIPAddition = ev => {
+		setPIPAdditionModalOpen(true);
 	};
+	
 	const performSearch = ev => setQuery(ev.target.value.toLowerCase());
 
 	const loader = <CircularProgress />;
@@ -135,10 +136,10 @@ function Home() {
 							<Grid item>
 								<TextField
 									select
-									label="Env"
-									value={env}
+									label="PIP"
+									value={currentPip}
 									fullWidth={true}
-									onChange={handleEnvChange}
+									onChange={handlePIPChange}
 									variant="outlined"
 									InputProps={{
 										startAdornment: (
@@ -148,9 +149,9 @@ function Home() {
 										),
 									}}
 								>
-									{ENVS.map((option, index) => (
+									{PIPS.map((option, index) => (
 										<MenuItem
-											key={`env-menu-item-${index}`}
+											key={`pip-menu-item-${index}`}
 											value={option}
 										>
 											{option}
@@ -168,7 +169,7 @@ function Home() {
 											variant="inherit"
 											align="center"
 										>
-											Add Env
+											Add PIP
 										</Typography>
 									</MenuItem>
 								</TextField>
@@ -218,9 +219,9 @@ function Home() {
 
 			{/* Modals */}
 
-			<EnvAdditionModal
-				isOpen={envAdditionModalOpen}
-				handleClose={handleEnvAdditionDialogClose}
+			<PIPAdditionModal
+				isOpen={pipAdditionModalOpen}
+				handleClose={handlePIPAdditionDialogClose}
 			/>
 
 			{/* Modal to install packages */}

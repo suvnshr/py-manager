@@ -141,11 +141,11 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 						<Grid container>
 							<Grid item xs={2} />
 							<Grid item xs={8}>
-								<Box height="40vh">
 									<p />
 									<Typography variant="h6">
 										Installed packages
 									</Typography>
+								<Box height="38vh" style={{overflowX: "auto"}}>
 
 									<List>
 										{Object.entries(
@@ -212,7 +212,7 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 								</p>
 								<Box
 									className={classes.pre}
-									height="40vh"
+									height="38vh"
 									id="installation-output"
 								>
 									<pre

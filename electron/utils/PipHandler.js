@@ -1,8 +1,11 @@
 const { exec } = require('child_process');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const Store = require('electron-store');
 
-const { shell } = require('electron');
+const { shell, ipcRenderer } = require('electron');
+const { StoreSharp } = require('@material-ui/icons');
+const store = new Store();
 
 class PipHandler {
 	// getting pip reference
@@ -147,6 +150,53 @@ class PipHandler {
 				);
 			},
 		);
+	}
+
+	validateAndAddPIP(mainWindow, pipName, pipPath) {
+		// Check whether a PIP with the same `pipName` exists or not
+		// Verify whether `pipPath` is a valid PIP path
+
+		// const storedPIPs = store.get('PIPS', {});
+
+		let pipNameValid = false;
+		let pipNameError = 'PIP with this name already exists';
+
+		let pipPathValid = false;
+		let pipPathError = 'Please select a valid PIP';
+
+		if (pipNameValid && pipPathValid) {
+			// Add `pipName` and `pipPath` to electron-store
+		}
+
+		mainWindow.webContents.send(
+			'PIP_ADDITION_RESULTS',
+			pipNameValid && pipPathValid,
+			pipNameError,
+			pipPathError,
+		);
+	}
+
+	openPIPDialog(mainWindow, dialog) {
+		dialog
+			.showOpenDialog({
+				title: 'Choose a PIP path',
+				buttonLabel: 'Select PIP',
+				properties: ['openFile'],
+			})
+			.then(dialogData => {
+				let pipPath = '';
+
+				if (!dialogData.canceled) {
+					pipPath = dialogData.filePaths[0];
+				}
+
+				mainWindow.webContents.send(
+					'PIP_FILE_DIALOG_RESULTS',
+					pipPath,
+					dialogData.cancelled,
+				);
+			})
+			.catch(err => console.log(err));
 	}
 
 	installPackage(mainWindow, packagesData) {

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 // const getPackages = require('./utils/getPackages');
@@ -77,4 +77,12 @@ ipcMain.handle('PACKAGES_INSTALL', function (ev, packagesData) {
 
 ipcMain.handle('OPEN_LINK', function (ev, URL) {
 	pipPackagesHandler.openURLInBrowser(URL);
+});
+
+ipcMain.handle('PIP_FILE_DIALOG', function (ev) {
+	pipPackagesHandler.openPIPDialog(mainWindow,  dialog);
+});
+
+ipcMain.handle('PIP_ADDITION', function (ev, pipName, pipPath) {
+	pipPackagesHandler.validateAndAddPIP(mainWindow,  pipName, pipPath);
 });
