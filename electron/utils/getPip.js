@@ -1,5 +1,6 @@
 function getPip() {
-	//TODO
+	//TODO:
+	// Return the value of `currentPIP` key from electron-store
 	return 'pip3';
 }
 

@@ -153,10 +153,12 @@ class PipHandler {
 	}
 
 	validateAndAddPIP(mainWindow, pipName, pipPath) {
-		// Check whether a PIP with the same `pipName` exists or not
-		// Verify whether `pipPath` is a valid PIP path
-
-		// const storedPIPs = store.get('PIPS', {});
+		// TODO:
+		// We need to check 3 things:
+		// 1) Whether a PIP with the same name exists in the electron-store already or not
+		// 2) Whether a PIP with the same path exists in the electron-store or not
+		// 3) Whether `pipPath` is valid pip path or not
+		// 4) Both `pipName` and `pipPath` should be valid non-empty strings
 
 		let pipNameValid = false;
 		let pipNameError = 'PIP with this name already exists';
@@ -165,7 +167,10 @@ class PipHandler {
 		let pipPathError = 'Please select a valid PIP';
 
 		if (pipNameValid && pipPathValid) {
-			// Add `pipName` and `pipPath` to electron-store
+			// TODO:
+			// Add `pipName` & `pipPath` to electron-store here
+			// and set the `currentPIP` key in electron-store, 
+			// which will hold the value of currently used PIP  
 		}
 
 		mainWindow.webContents.send(

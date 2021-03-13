@@ -60,8 +60,9 @@ export default function PIPAdditionModal({ isOpen, handleClose }) {
 			'PIP_ADDITION_RESULTS',
 			function (ev, isPIPAdded, pipNameError, pipPathError) {
 				if (isPIPAdded) {
-					// TODO: close the modal and refresh page
+					// Close the modal and refresh the page
 					handleClose();
+					window.location.reload()
 				} else {
 					setPIPNameError(pipNameError);
 					setPipPathError(pipPathError);
