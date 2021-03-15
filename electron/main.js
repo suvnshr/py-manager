@@ -80,9 +80,24 @@ ipcMain.handle('OPEN_LINK', function (ev, URL) {
 });
 
 ipcMain.handle('PIP_FILE_DIALOG', function (ev) {
-	pipPackagesHandler.openPIPDialog(mainWindow,  dialog);
+	pipPackagesHandler.openPIPDialog(mainWindow, dialog);
 });
 
 ipcMain.handle('PIP_ADDITION', function (ev, pipName, pipPath) {
-	pipPackagesHandler.validateAndAddPIP(mainWindow,  pipName, pipPath);
+	pipPackagesHandler.validateAndAddPIP(mainWindow, pipName, pipPath);
 });
+
+ipcMain.handle('GET_CURRENT_PIP', function (ev) {
+	pipPackagesHandler.sendCurrentPIP(mainWindow);
+});
+
+ipcMain.handle('GET_ALL_PIPS', function (ev) {
+	pipPackagesHandler.sendAllPIPS(mainWindow);
+});
+
+
+ipcMain.handle('CHANGE_CURRENT_PIP', function (ev, pipName) {
+	pipPackagesHandler.changeCurrentPIP(mainWindow, pipName);
+});
+
+

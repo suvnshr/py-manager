@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import { FaPython } from 'react-icons/fa';
 
@@ -27,6 +27,7 @@ import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
 import PIPAdditionModal from './PIPAdditionModal';
 import PackageCard from './PackageCard';
+import { PIPContext } from '../../context/PIPContext';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -35,13 +36,21 @@ const PIPS = ['main', '1234567890'];
 function Home() {
 	const [packages, setPackages] = useState(null);
 	const [query, setQuery] = useState('');
-	const [currentPip, setCurrentPip] = useState(PIPS[0]);
 	const [pipAdditionModalOpen, setPIPAdditionModalOpen] = useState(false);
 	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(
 		false,
 	);
 
 	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
+
+	const { currentPIP, allPIPS } = useContext(PIPContext);
+
+	const changeCurrentPIP = pipName => {
+		if (pipName !== currentPIP.pipName) {
+			ipcRenderer.invoke('CHANGE_CURRENT_PIP', pipName);
+			window.location.reload();
+		}
+	};
 
 	const handleInstallStatusClose = ev => {
 		setOpenInstallStatusModal(false);
@@ -60,6 +69,10 @@ function Home() {
 	};
 
 	useEffect(() => {
+		console.log(currentPIP, allPIPS);
+	}, [currentPIP, allPIPS]);
+
+	useEffect(() => {
 		ipcRenderer.invoke('RECEIVE_PACKAGES');
 
 		ipcRenderer.on('SEND_PACKAGES', function (ev, packagesData) {
@@ -68,19 +81,19 @@ function Home() {
 	}, []);
 
 	const handlePIPChange = ev => {
-		const value = ev.target.value;
-
-		if (value !== null) setCurrentPip(ev.target.value);
-		else handlePIPAddition(ev);
+		const pipName = ev.target.value;
+		if (pipName === null) handlePIPAddition(ev);
 	};
 
 	const handlePIPAddition = ev => {
 		setPIPAdditionModalOpen(true);
 	};
-	
+
 	const performSearch = ev => setQuery(ev.target.value.toLowerCase());
 
 	const loader = <CircularProgress />;
+
+	const smallLoader = <CircularProgress size={20} />;
 
 	const noResultsFound = <div>No packages installed</div>;
 
@@ -134,45 +147,56 @@ function Home() {
 							</Grid>
 
 							<Grid item>
-								<TextField
-									select
-									label="PIP"
-									value={currentPip}
-									fullWidth={true}
-									onChange={handlePIPChange}
-									variant="outlined"
-									InputProps={{
-										startAdornment: (
-											<InputAdornment position="start">
-												<FaPython color="primary" />
-											</InputAdornment>
-										),
-									}}
-								>
-									{PIPS.map((option, index) => (
-										<MenuItem
-											key={`pip-menu-item-${index}`}
-											value={option}
-										>
-											{option}
+								{currentPIP === null || allPIPS === null ? (
+									smallLoader
+								) : (
+									<TextField
+										select
+										label="Current PIP"
+										value={currentPIP.pipName}
+										fullWidth={true}
+										onChange={handlePIPChange}
+										variant="outlined"
+										InputProps={{
+											startAdornment: (
+												<InputAdornment position="start">
+													<FaPython color="primary" />
+												</InputAdornment>
+											),
+										}}
+									>
+										{Object.entries(allPIPS).map(
+											([pipName, pipPath], index) => (
+												<MenuItem
+													onClick={ev =>
+														changeCurrentPIP(
+															pipName,
+														)
+													}
+													key={`pip-menu-item-${index}`}
+													value={pipName}
+												>
+													{pipName}
+												</MenuItem>
+											),
+										)}
+
+										<Divider light />
+
+										<MenuItem value={null}>
+											<ListItemIcon>
+												<Add />
+											</ListItemIcon>
+
+											<Typography
+												variant="inherit"
+												align="center"
+											>
+												Add PIP
+											</Typography>
 										</MenuItem>
-									))}
-
-									<Divider light />
-
-									<MenuItem value={null}>
-										<ListItemIcon>
-											<Add />
-										</ListItemIcon>
-
-										<Typography
-											variant="inherit"
-											align="center"
-										>
-											Add PIP
-										</Typography>
-									</MenuItem>
-								</TextField>
+									</TextField>
+								)}
 							</Grid>
 						</Grid>
 						<p />

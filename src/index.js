@@ -12,23 +12,26 @@ import routes from './commons/routes';
 
 import Home from './components/Home/Home';
 import PackageDetail from './components/PackageDetail/PackageDetail';
+import { PIPContentProvider } from './context/PIPContext';
 
 ReactDOM.render(
 	<React.StrictMode>
 		<ThemeProvider theme={customTheme}>
-			<CssBaseline />
-			<Router>
-				<Switch>
-					<Route exact path={routes.HOME}>
-						<Root>
-							<Home />
-						</Root>
-					</Route>
-					<Route path={routes.PACKAGE_DETAIL_WITH_PARAM}>
-						<PackageDetail />
-					</Route>
-				</Switch>
-			</Router>
+			<PIPContentProvider>
+				<CssBaseline />
+				<Router>
+					<Switch>
+						<Route exact path={routes.HOME}>
+							<Root>
+								<Home />
+							</Root>
+						</Route>
+						<Route path={routes.PACKAGE_DETAIL_WITH_PARAM}>
+							<PackageDetail />
+						</Route>
+					</Switch>
+				</Router>
+			</PIPContentProvider>
 		</ThemeProvider>
 	</React.StrictMode>,
 	document.getElementById('root'),

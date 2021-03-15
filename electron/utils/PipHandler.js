@@ -4,13 +4,66 @@ const cheerio = require('cheerio');
 const Store = require('electron-store');
 
 const { shell, ipcRenderer } = require('electron');
-const { StoreSharp } = require('@material-ui/icons');
 const store = new Store();
 
+const ALL_PIPS_KEY = 'ALL_PIPS';
+const CURRENT_PIP_KEY = 'CURRENT_PIP';
+
 class PipHandler {
-	// getting pip reference
-	getPip() {
-		return 'pip3';
+	constructor() {
+		this.defaultPIP = this.getDefaultPIP();
+	}
+
+	getDefaultPIP() {
+		// TODO: the default PIP command may be different for different platforms
+		return { pipName: 'main', pipPath: 'pip3' };
+	}
+
+	// Getting the current PIP
+	getCurrentPip() {
+		return store.get(CURRENT_PIP_KEY, this.defaultPIP);
+	}
+
+	// Get the current PIP path
+	getCurrentPIPPath() {
+		return this.getCurrentPip().pipPath;
+	}
+
+	// Get all the added PIPS not including the default PIP
+	_getAllPIPS() {
+		return store.get(ALL_PIPS_KEY, {});
+	}
+
+	// Get all the added PIPS including the default PIP
+	getAllPIPS() {
+		const _allPIPS = this._getAllPIPS();
+		const defaultPIP = this.defaultPIP;
+
+		_allPIPS[defaultPIP.pipName] = defaultPIP.pipPath;
+
+		return _allPIPS;
+	}
+
+	// Send the current PIP to `mainWindow`
+	sendCurrentPIP(mainWindow) {
+		mainWindow.webContents.send(
+			'CURRENT_PIP_RESULTS',
+			this.getCurrentPip(),
+		);
+	}
+
+	// Add a PIP to `ALL_PIPS_KEY` in store
+	addPIPToAllPIPS(pipName, pipPath) {
+		// The list of PIPs without the default PIP
+		const _allPIPS = this._getAllPIPS();
+
+		_allPIPS[pipName] = pipPath;
+		store.set(ALL_PIPS_KEY, _allPIPS);
+	}
+
+	// Send all added PIPS to `mainWindow`
+	sendAllPIPS(mainWindow) {
+		mainWindow.webContents.send('ALL_PIPS_RESULTS', this.getAllPIPS());
 	}
 
 	// open URL in browser
@@ -20,7 +73,7 @@ class PipHandler {
 
 	// getting installed packages
 	getPackages(mainWindow) {
-		const PIP = this.getPip();
+		const PIP = this.getCurrentPIPPath();
 
 		exec(`${PIP} list --format json`, (error, stdout, stderr) => {
 			if (error) {
@@ -42,7 +95,7 @@ class PipHandler {
 
 	// getting individual package detail
 	getPackageDetail(mainWindow, packageName) {
-		const PIP = this.getPip();
+		const PIP = this.getCurrentPIPPath();
 
 		exec(`${PIP} show -V ${packageName}`, (error, stdout, stderr) => {
 			if (error) {
@@ -129,7 +182,7 @@ class PipHandler {
 	}
 
 	uninstallPackage(mainWindow, packageName) {
-		const PIP = this.getPip();
+		const PIP = this.getCurrentPIPPath();
 
 		exec(
 			`${PIP} uninstall ${packageName} --yes`,
@@ -152,33 +205,80 @@ class PipHandler {
 		);
 	}
 
+	// Validate the PIP name and path and then add it to `electron-store`
 	validateAndAddPIP(mainWindow, pipName, pipPath) {
-		// TODO:
-		// We need to check 3 things:
-		// 1) Whether a PIP with the same name exists in the electron-store already or not
-		// 2) Whether a PIP with the same path exists in the electron-store or not
-		// 3) Whether `pipPath` is valid pip path or not
-		// 4) Both `pipName` and `pipPath` should be valid non-empty strings
+		let pipNameValid = true;
+		let pipNameError = '';
 
-		let pipNameValid = false;
-		let pipNameError = 'PIP with this name already exists';
+		let pipPathValid = true;
+		let pipPathError = '';
 
-		let pipPathValid = false;
-		let pipPathError = 'Please select a valid PIP';
+		// The list of PIPs including the default PIP
+		const allPIPS = this.getAllPIPS();
 
-		if (pipNameValid && pipPathValid) {
-			// TODO:
-			// Add `pipName` & `pipPath` to electron-store here
-			// and set the `currentPIP` key in electron-store, 
-			// which will hold the value of currently used PIP  
+		exec(`${pipPath} --help`, (error, stdout, stderr) => {
+		
+			// Check whether `pipPath` is a valid PIP path or not
+			if (error) {
+				pipPathError = 'Choose a valid PIP path';
+				pipPathError = false;
+			}
+
+			// Check whether `pipName` is already in the store or not
+			if (typeof allPIPS[pipName] !== 'undefined') {
+				pipNameValid = false;
+				pipNameError = 'A PIP with this name already added';
+			}
+
+			// Check whether `pipPath` is already in the store or not
+			if (Object.values(allPIPS).includes(pipPath)) {
+				pipPathValid = false;
+				pipPathError = 'A PIP with this path is already added';
+			}
+
+			// The name of the PIP should be not empty
+			if (pipName.length === 0) {
+				pipNameValid = false;
+				pipNameError = 'PIP name cannot be empty';
+			}
+
+			// The PIP path should be not empty
+			if (pipPath.length === 0) {
+				pipPathValid = false;
+				pipPathError = 'PIP path cannot be empty';
+			}
+
+			if (pipNameValid && pipPathValid) {
+				this.addPIPToAllPIPS(pipName, pipPath);
+				this.setCurrentPIP(pipName, pipPath);
+			}
+
+			mainWindow.webContents.send(
+				'PIP_ADDITION_RESULTS',
+				pipNameValid && pipPathValid,
+				pipNameError,
+				pipPathError,
+			);
+		});
+	}
+
+	// Set `CURRENT_PIP_KEY` in `electron-store`
+	setCurrentPIP(pipName, pipPath) {
+		store.set(CURRENT_PIP_KEY, { pipName, pipPath });
+	}
+
+	changeCurrentPIP(mainWindow, pipName) {
+		const allPIPS = this.getAllPIPS();
+
+		// If the user selects the default PIP
+		// then unset `CURRENT_PIP_KEY`
+		if (pipName === this.defaultPIP.pipName) {
+			store.delete(CURRENT_PIP_KEY);
+			return;
 		}
 
-		mainWindow.webContents.send(
-			'PIP_ADDITION_RESULTS',
-			pipNameValid && pipPathValid,
-			pipNameError,
-			pipPathError,
-		);
+		// Set the `CURRENT_PIP_KEY` if default PIP is not selected.
+		this.setCurrentPIP(pipName, allPIPS[pipName]);
 	}
 
 	openPIPDialog(mainWindow, dialog) {
@@ -212,7 +312,7 @@ class PipHandler {
 				(installCommand += ` ${packageName}==${packageVersion}`),
 		);
 
-		const PIP = this.getPip();
+		const PIP = this.getCurrentPIPPath();
 		installCommand = PIP + ' install' + installCommand;
 
 		exec(installCommand, (error, stdout, stderr) => {
