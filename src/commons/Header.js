@@ -12,9 +12,7 @@ import {
 } from '@material-ui/core';
 import { FaPython } from 'react-icons/fa';
 
-import {
-	Add,
-} from '@material-ui/icons';
+import { Add } from '@material-ui/icons';
 import EnvAdditionModal from '../components/Home/EnvAdditionModal';
 
 const useStyles = makeStyles(theme => ({
@@ -33,10 +31,10 @@ const useStyles = makeStyles(theme => ({
 	},
 	envSelect: {
 		[theme.breakpoints.up('sm')]: {
-			marginLeft: theme.spacing(1),
-		}
+			paddingTop: theme.spacing(0.5),
+			marginLeft: theme.spacing(1.5),
+		},
 	},
-	
 }));
 
 const ENVS = ['main', '1234567890'];
@@ -70,12 +68,10 @@ function Header({ showBack }) {
 					<TextField
 						select
 						className={classes.envSelect}
-						label="Env"
 						value={env}
 						onChange={handleEnvChange}
-						variant="filled"
 						InputProps={{
-							
+							disableUnderline: true,
 							startAdornment: (
 								<InputAdornment position="start">
 									<FaPython color="primary" />
