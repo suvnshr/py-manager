@@ -1,15 +1,26 @@
 import React, { useState, useContext } from 'react';
 import {
-	Typography,
+	Typography as ButtonBase,
 	makeStyles,
 	AppBar,
 	Toolbar,
+	Button,
+	Icon,
 	TextField,
 	MenuItem,
 	Divider,
 	ListItemIcon,
 	InputAdornment,
-	Button,
+	Dialog,
+	withStyles,
+	Radio,
+	DialogActions,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	Grid,
+	List,
+	ListItem,
 } from '@material-ui/core';
 import { FaPython } from 'react-icons/fa';
 
@@ -17,11 +28,13 @@ import { Add } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import PIPAdditionModal from '../components/Home/PIPAdditionModal';
 import { PIPContext } from '../context/PIPContext';
+import PIPSelectModal from '../components/Home/PIPSelectModal';
 
 const useStyles = makeStyles(theme => ({
 	root: {
 		flexGrow: 1,
 	},
+	
 	menuButton: {
 		marginRight: theme.spacing(2),
 	},
@@ -61,9 +74,9 @@ function Header({}) {
 		<header className={classes.root}>
 			<AppBar position="static">
 				<Toolbar>
-					<Typography className={classes.title} variant="h5" noWrap>
+					<ButtonBase className={classes.title} variant="h5" noWrap>
 						PyManager
-					</Typography>
+					</ButtonBase>
 
 					{currentPIP !== null && allPIPS !== null ? (
 						<Button
