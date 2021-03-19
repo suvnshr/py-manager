@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
 	Typography,
 	makeStyles,
@@ -9,11 +9,14 @@ import {
 	Divider,
 	ListItemIcon,
 	InputAdornment,
+	Button,
 } from '@material-ui/core';
 import { FaPython } from 'react-icons/fa';
 
 import { Add } from '@material-ui/icons';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import PIPAdditionModal from '../components/Home/PIPAdditionModal';
+import { PIPContext } from '../context/PIPContext';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -22,6 +25,12 @@ const useStyles = makeStyles(theme => ({
 	menuButton: {
 		marginRight: theme.spacing(2),
 	},
+	pipSelectButton: {
+		marginLeft: 15,
+		padding: 10,
+		fontSize: '1.15em',
+		textTransform: 'none',
+	},
 	title: {
 		// flexGrow: 1,
 		display: 'none',
@@ -29,33 +38,25 @@ const useStyles = makeStyles(theme => ({
 			display: 'block',
 		},
 	},
-	envSelect: {
-		[theme.breakpoints.up('sm')]: {
-			paddingTop: theme.spacing(0.5),
-			marginLeft: theme.spacing(1.5),
-		},
+	arrowDropDownIcon: {
+		marginLeft: 0,
 	},
 }));
 
-const ENVS = ['main', '1234567890'];
-
-function Header({ showBack }) {
+function Header({}) {
 	const classes = useStyles();
-	const [env, setEnv] = useState(ENVS[0]);
-	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
 
-	const handleEnvChange = ev => {
-		const value = ev.target.value;
+	const { currentPIP, allPIPS } = useContext(PIPContext);
+	const [pipSelectModalOpen, setPIPSelectModalOpen] = useState(false);
 
-		if (value !== null) setEnv(ev.target.value);
-		else handleEnvAddition(ev);
+	const handlePIPSelectOpen = ev => {
+		setPIPSelectModalOpen(true);
 	};
-	const handleEnvAddition = ev => {
-		setEnvAdditionModalOpen(true);
+
+	const handlePIPSelectClose = ev => {
+		setPIPSelectModalOpen(false);
 	};
-	const handleEnvAdditionDialogClose = ev => {
-		setEnvAdditionModalOpen(false);
-	};
+
 	return (
 		<header className={classes.root}>
 			<AppBar position="static">
@@ -64,50 +65,22 @@ function Header({ showBack }) {
 						PyManager
 					</Typography>
 
-					{/* <Grid item> */}
-					<TextField
-						select
-						className={classes.envSelect}
-						value={env}
-						onChange={handleEnvChange}
-						InputProps={{
-							disableUnderline: true,
-							startAdornment: (
-								<InputAdornment position="start">
-									<FaPython color="primary" />
-								</InputAdornment>
-							),
-						}}
-					>
-						{ENVS.map((option, index) => (
-							<MenuItem
-								key={`env-menu-item-${index}`}
-								value={option}
-							>
-								{option}
-							</MenuItem>
-						))}
-
-						<Divider light />
-
-						<MenuItem value={null}>
-							<ListItemIcon>
-								<Add />
-							</ListItemIcon>
-
-							<Typography variant="inherit" align="center">
-								Add Env
-							</Typography>
-						</MenuItem>
-					</TextField>
-					{/* </Grid> */}
+					{currentPIP !== null && allPIPS !== null ? (
+						<Button
+							className={classes.pipSelectButton}
+							// variant="outlined"
+							startIcon={<FaPython size="0.9em" />}
+							endIcon={
+								<ArrowDropDownIcon
+									className={classes.arrowDropDownIcon}
+								/>
+							}
+						>
+							{currentPIP.pipName}
+						</Button>
+					) : null}
 				</Toolbar>
 			</AppBar>
-
-			<PIPAdditionModal
-				isOpen={envAdditionModalOpen}
-				handleClose={handleEnvAdditionDialogClose}
-			/>
 		</header>
 	);
 }
