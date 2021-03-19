@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
+import { FaPython } from 'react-icons/fa';
 
 import {
 	Button,
@@ -9,34 +10,55 @@ import {
 	Divider,
 	Grid,
 	InputAdornment,
+	ListItemIcon,
+	MenuItem,
 	TextField,
+	Typography,
 } from '@material-ui/core';
 import {
+	Add,
+	Delete,
 	GetApp,
+	GetAppOutlined,
 	SearchOutlined,
 } from '@material-ui/icons';
 
 import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
+import PIPAdditionModal from './PIPAdditionModal';
 import PackageCard from './PackageCard';
+import { PIPContext } from '../../context/PIPContext';
 
 const { ipcRenderer } = window.require('electron');
 
+const PIPS = ['main', '1234567890'];
 
 function Home() {
 	const [packages, setPackages] = useState(null);
 	const [query, setQuery] = useState('');
+	const [pipAdditionModalOpen, setPIPAdditionModalOpen] = useState(false);
 	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(
 		false,
 	);
 
 	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
 
+	const { currentPIP, allPIPS } = useContext(PIPContext);
+
+	const changeCurrentPIP = pipName => {
+		if (pipName !== currentPIP.pipName) {
+			ipcRenderer.invoke('CHANGE_CURRENT_PIP', pipName);
+			window.location.reload();
+		}
+	};
+
 	const handleInstallStatusClose = ev => {
 		setOpenInstallStatusModal(false);
 	};
 
-	
+	const handlePIPAdditionDialogClose = ev => {
+		setPIPAdditionModalOpen(false);
+	};
 
 	const handlePackageInstallModalClose = ev => {
 		setPackageInstallModalOpen(false);
@@ -47,6 +69,10 @@ function Home() {
 	};
 
 	useEffect(() => {
+		console.log(currentPIP, allPIPS);
+	}, [currentPIP, allPIPS]);
+
+	useEffect(() => {
 		ipcRenderer.invoke('RECEIVE_PACKAGES');
 
 		ipcRenderer.on('SEND_PACKAGES', function (ev, packagesData) {
@@ -54,12 +80,20 @@ function Home() {
 		});
 	}, []);
 
-	
+	const handlePIPChange = ev => {
+		const pipName = ev.target.value;
+		if (pipName === null) handlePIPAddition(ev);
+	};
 
-	
+	const handlePIPAddition = ev => {
+		setPIPAdditionModalOpen(true);
+	};
+
 	const performSearch = ev => setQuery(ev.target.value.toLowerCase());
 
 	const loader = <CircularProgress />;
+
+	const smallLoader = <CircularProgress size={20} />;
 
 	const noResultsFound = <div>No packages installed</div>;
 
@@ -112,7 +146,58 @@ function Home() {
 								/>
 							</Grid>
 
-							
+							<Grid item>
+								{currentPIP === null || allPIPS === null ? (
+									smallLoader
+								) : (
+									<TextField
+										select
+										label="Current PIP"
+										value={currentPIP.pipName}
+										fullWidth={true}
+										onChange={handlePIPChange}
+										variant="outlined"
+										InputProps={{
+											startAdornment: (
+												<InputAdornment position="start">
+													<FaPython color="primary" />
+												</InputAdornment>
+											),
+										}}
+									>
+										{Object.entries(allPIPS).map(
+											([pipName, pipPath], index) => (
+												<MenuItem
+													onClick={ev =>
+														changeCurrentPIP(
+															pipName,
+														)
+													}
+													key={`pip-menu-item-${index}`}
+													value={pipName}
+												>
+													{pipName}
+												</MenuItem>
+											),
+										)}
+
+										<Divider light />
+
+										<MenuItem value={null}>
+											<ListItemIcon>
+												<Add />
+											</ListItemIcon>
+
+											<Typography
+												variant="inherit"
+												align="center"
+											>
+												Add PIP
+											</Typography>
+										</MenuItem>
+									</TextField>
+								)}
+							</Grid>
 						</Grid>
 						<p />
 					</div>
@@ -158,7 +243,10 @@ function Home() {
 
 			{/* Modals */}
 
-			
+			<PIPAdditionModal
+				isOpen={pipAdditionModalOpen}
+				handleClose={handlePIPAdditionDialogClose}
+			/>
 
 			{/* Modal to install packages */}
 			<InstallPackagesDialog
