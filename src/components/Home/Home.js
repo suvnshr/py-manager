@@ -203,34 +203,39 @@ function Home() {
 					</div>
 
 					<p />
-					{packages !== null ? (
-						<Grid justify="center" container>
+				</Grid>
+			</Grid>
+
+
+			<p />
+			<Divider light />
+			<p />
+
+			<Container>
+				<Grid container justify="space-between" style={{padding: 20}}>
+					<Grid item>
+						{packages !== null ? (
+							<Chip
+								component="span"
+								variant="outlined"
+								label={`${packages.length} packages installed`}
+							/>
+						) : null}
+					</Grid>
+
+					<Grid item>
+						{packages !== null ? (
 							<Button
-								variant="contained"
+								// variant="contained"
 								color="secondary"
 								onClick={handlePackageInstall}
 								startIcon={<GetApp />}
 							>
-								Install
+								Install packages
 							</Button>
-						</Grid>
-					) : null}
-
-					<p />
+						) : null}
+					</Grid>
 				</Grid>
-			</Grid>
-
-			<Divider light />
-
-			<Container>
-				{packages !== null ? (
-					<div style={{ padding: 5, textAlign: 'right' }}>
-						<Chip
-							component="span"
-							label={`${packages.length} packages installed`}
-						/>
-					</div>
-				) : null}
 
 				<Grid container justify="center">
 					{packages === null
