@@ -13,7 +13,7 @@ import {
 import { FaPython } from 'react-icons/fa';
 
 import { Add } from '@material-ui/icons';
-import EnvAdditionModal from '../components/Home/EnvAdditionModal';
+import PIPAdditionModal from '../components/Home/PIPAdditionModal';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -104,7 +104,7 @@ function Header({ showBack }) {
 				</Toolbar>
 			</AppBar>
 
-			<EnvAdditionModal
+			<PIPAdditionModal
 				isOpen={envAdditionModalOpen}
 				handleClose={handleEnvAdditionDialogClose}
 			/>
