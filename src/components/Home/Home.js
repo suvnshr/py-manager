@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { FaPython } from 'react-icons/fa';
 
 import {
 	Button,
@@ -10,33 +9,23 @@ import {
 	Divider,
 	Grid,
 	InputAdornment,
-	ListItemIcon,
-	MenuItem,
 	TextField,
-	Typography,
 } from '@material-ui/core';
 import {
-	Add,
-	Delete,
 	GetApp,
-	GetAppOutlined,
 	SearchOutlined,
 } from '@material-ui/icons';
 
 import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
-import EnvAdditionModal from './EnvAdditionModal';
 import PackageCard from './PackageCard';
 
 const { ipcRenderer } = window.require('electron');
 
-const ENVS = ['main', '1234567890'];
 
 function Home() {
 	const [packages, setPackages] = useState(null);
 	const [query, setQuery] = useState('');
-	const [env, setEnv] = useState(ENVS[0]);
-	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
 	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(
 		false,
 	);
@@ -47,9 +36,7 @@ function Home() {
 		setOpenInstallStatusModal(false);
 	};
 
-	const handleEnvAdditionDialogClose = ev => {
-		setEnvAdditionModalOpen(false);
-	};
+	
 
 	const handlePackageInstallModalClose = ev => {
 		setPackageInstallModalOpen(false);
@@ -67,16 +54,9 @@ function Home() {
 		});
 	}, []);
 
-	const handleEnvChange = ev => {
-		const value = ev.target.value;
+	
 
-		if (value !== null) setEnv(ev.target.value);
-		else handleEnvAddition(ev);
-	};
-
-	const handleEnvAddition = ev => {
-		setEnvAdditionModalOpen(true);
-	};
+	
 	const performSearch = ev => setQuery(ev.target.value.toLowerCase());
 
 	const loader = <CircularProgress />;
@@ -132,47 +112,7 @@ function Home() {
 								/>
 							</Grid>
 
-							<Grid item>
-								<TextField
-									select
-									label="Env"
-									value={env}
-									fullWidth={true}
-									onChange={handleEnvChange}
-									variant="outlined"
-									InputProps={{
-										startAdornment: (
-											<InputAdornment position="start">
-												<FaPython color="primary" />
-											</InputAdornment>
-										),
-									}}
-								>
-									{ENVS.map((option, index) => (
-										<MenuItem
-											key={`env-menu-item-${index}`}
-											value={option}
-										>
-											{option}
-										</MenuItem>
-									))}
-
-									<Divider light />
-
-									<MenuItem value={null}>
-										<ListItemIcon>
-											<Add />
-										</ListItemIcon>
-
-										<Typography
-											variant="inherit"
-											align="center"
-										>
-											Add Env
-										</Typography>
-									</MenuItem>
-								</TextField>
-							</Grid>
+							
 						</Grid>
 						<p />
 					</div>
@@ -218,10 +158,7 @@ function Home() {
 
 			{/* Modals */}
 
-			<EnvAdditionModal
-				isOpen={envAdditionModalOpen}
-				handleClose={handleEnvAdditionDialogClose}
-			/>
+			
 
 			{/* Modal to install packages */}
 			<InstallPackagesDialog

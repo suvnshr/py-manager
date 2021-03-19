@@ -1,5 +1,21 @@
-import React from 'react';
-import { Typography, makeStyles, AppBar, Toolbar } from '@material-ui/core';
+import React, { useState } from 'react';
+import {
+	Typography,
+	makeStyles,
+	AppBar,
+	Toolbar,
+	TextField,
+	MenuItem,
+	Divider,
+	ListItemIcon,
+	InputAdornment,
+} from '@material-ui/core';
+import { FaPython } from 'react-icons/fa';
+
+import {
+	Add,
+} from '@material-ui/icons';
+import EnvAdditionModal from '../components/Home/EnvAdditionModal';
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -9,17 +25,39 @@ const useStyles = makeStyles(theme => ({
 		marginRight: theme.spacing(2),
 	},
 	title: {
-		flexGrow: 1,
+		// flexGrow: 1,
 		display: 'none',
 		[theme.breakpoints.up('sm')]: {
 			display: 'block',
 		},
 	},
+	envSelect: {
+		[theme.breakpoints.up('sm')]: {
+			marginLeft: theme.spacing(1),
+		}
+	},
+	
 }));
+
+const ENVS = ['main', '1234567890'];
 
 function Header({ showBack }) {
 	const classes = useStyles();
+	const [env, setEnv] = useState(ENVS[0]);
+	const [envAdditionModalOpen, setEnvAdditionModalOpen] = useState(false);
 
+	const handleEnvChange = ev => {
+		const value = ev.target.value;
+
+		if (value !== null) setEnv(ev.target.value);
+		else handleEnvAddition(ev);
+	};
+	const handleEnvAddition = ev => {
+		setEnvAdditionModalOpen(true);
+	};
+	const handleEnvAdditionDialogClose = ev => {
+		setEnvAdditionModalOpen(false);
+	};
 	return (
 		<header className={classes.root}>
 			<AppBar position="static">
@@ -27,8 +65,53 @@ function Header({ showBack }) {
 					<Typography className={classes.title} variant="h5" noWrap>
 						PyManager
 					</Typography>
+
+					{/* <Grid item> */}
+					<TextField
+						select
+						className={classes.envSelect}
+						label="Env"
+						value={env}
+						onChange={handleEnvChange}
+						variant="filled"
+						InputProps={{
+							
+							startAdornment: (
+								<InputAdornment position="start">
+									<FaPython color="primary" />
+								</InputAdornment>
+							),
+						}}
+					>
+						{ENVS.map((option, index) => (
+							<MenuItem
+								key={`env-menu-item-${index}`}
+								value={option}
+							>
+								{option}
+							</MenuItem>
+						))}
+
+						<Divider light />
+
+						<MenuItem value={null}>
+							<ListItemIcon>
+								<Add />
+							</ListItemIcon>
+
+							<Typography variant="inherit" align="center">
+								Add Env
+							</Typography>
+						</MenuItem>
+					</TextField>
+					{/* </Grid> */}
 				</Toolbar>
 			</AppBar>
+
+			<EnvAdditionModal
+				isOpen={envAdditionModalOpen}
+				handleClose={handleEnvAdditionDialogClose}
+			/>
 		</header>
 	);
 }
