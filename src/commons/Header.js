@@ -34,7 +34,6 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		flexGrow: 1,
 	},
-	
 	menuButton: {
 		marginRight: theme.spacing(2),
 	},
@@ -51,15 +50,12 @@ const useStyles = makeStyles(theme => ({
 			display: 'block',
 		},
 	},
-	arrowDropDownIcon: {
-		marginLeft: 0,
-	},
 }));
 
 function Header({}) {
 	const classes = useStyles();
 
-	const { currentPIP, allPIPS } = useContext(PIPContext);
+	const { currentPIP, PIPContextLoaded } = useContext(PIPContext);
 	const [pipSelectModalOpen, setPIPSelectModalOpen] = useState(false);
 
 	const handlePIPSelectOpen = ev => {
@@ -78,10 +74,10 @@ function Header({}) {
 						PyManager
 					</ButtonBase>
 
-					{currentPIP !== null && allPIPS !== null ? (
+					{PIPContextLoaded ? (
 						<Button
 							className={classes.pipSelectButton}
-							// variant="outlined"
+							onClick={handlePIPSelectOpen}
 							startIcon={<FaPython size="0.9em" />}
 							endIcon={
 								<ArrowDropDownIcon
@@ -94,6 +90,11 @@ function Header({}) {
 					) : null}
 				</Toolbar>
 			</AppBar>
+
+			<PIPSelectModal
+				open={pipSelectModalOpen}
+				handleClose={handlePIPSelectClose}
+			/>
 		</header>
 	);
 }

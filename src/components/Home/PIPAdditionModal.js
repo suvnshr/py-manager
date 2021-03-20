@@ -60,9 +60,10 @@ export default function PIPAdditionModal({ isOpen, handleClose }) {
 			'PIP_ADDITION_RESULTS',
 			function (ev, isPIPAdded, pipNameError, pipPathError) {
 				if (isPIPAdded) {
-					// Close the modal and refresh the page
+					// Close the modal
+					setPIPName('');
+					setPipPath('');
 					handleClose();
-					window.location.reload()
 				} else {
 					setPIPNameError(pipNameError);
 					setPipPathError(pipPathError);
@@ -104,7 +105,7 @@ export default function PIPAdditionModal({ isOpen, handleClose }) {
 							error={pipPathError}
 							htmlFor="pip-input"
 						>
-							PIP folder
+							PIP path
 						</InputLabel>
 						<OutlinedInput
 							id="pip-input"

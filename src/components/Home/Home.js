@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 
-import { FaPython } from 'react-icons/fa';
 
 import {
 	Button,
@@ -10,54 +9,35 @@ import {
 	Divider,
 	Grid,
 	InputAdornment,
-	ListItemIcon,
-	MenuItem,
 	TextField,
-	Typography,
 } from '@material-ui/core';
-import {
-	Add,
-	Delete,
-	GetApp,
-	GetAppOutlined,
-	SearchOutlined,
-} from '@material-ui/icons';
+import { GetApp, SearchOutlined } from '@material-ui/icons';
 
 import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
-import PIPAdditionModal from './PIPAdditionModal';
 import PackageCard from './PackageCard';
 import { PIPContext } from '../../context/PIPContext';
 
 const { ipcRenderer } = window.require('electron');
 
-const PIPS = ['main', '1234567890'];
-
 function Home() {
-	const [packages, setPackages] = useState(null);
 	const [query, setQuery] = useState('');
-	const [pipAdditionModalOpen, setPIPAdditionModalOpen] = useState(false);
 	const [packageInstallModalOpen, setPackageInstallModalOpen] = useState(
 		false,
 	);
-
 	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
 
-	const { currentPIP, allPIPS } = useContext(PIPContext);
-
-	const changeCurrentPIP = pipName => {
-		if (pipName !== currentPIP.pipName) {
-			ipcRenderer.invoke('CHANGE_CURRENT_PIP', pipName);
-			window.location.reload();
-		}
-	};
+	const { currentPIP, PIPContextLoaded, packages } = useContext(
+		PIPContext,
+	);
 
 	const handleInstallStatusClose = ev => {
 		setOpenInstallStatusModal(false);
-	};
 
-	const handlePIPAdditionDialogClose = ev => {
-		setPIPAdditionModalOpen(false);
+		// Receive updated list of packages after installation is complete
+		// console.log("Calling `receivePackages` from `handleInstallStatusClose`...");
+
+		receivePackages();
 	};
 
 	const handlePackageInstallModalClose = ev => {
@@ -68,32 +48,28 @@ function Home() {
 		setPackageInstallModalOpen(true);
 	};
 
-	useEffect(() => {
-		console.log(currentPIP, allPIPS);
-	}, [currentPIP, allPIPS]);
-
-	useEffect(() => {
+	const receivePackages = ev => {
 		ipcRenderer.invoke('RECEIVE_PACKAGES');
-
-		ipcRenderer.on('SEND_PACKAGES', function (ev, packagesData) {
-			setPackages(packagesData);
-		});
-	}, []);
-
-	const handlePIPChange = ev => {
-		const pipName = ev.target.value;
-		if (pipName === null) handlePIPAddition(ev);
 	};
 
-	const handlePIPAddition = ev => {
-		setPIPAdditionModalOpen(true);
-	};
+	useEffect(() => {
+		if (PIPContextLoaded) {
+			// console.log("Calling `receivePackages` from useEffect...");
+
+			// if `PIPContextLoaded` is true, then it means
+			// that `currentPIP`, `defaultPIP` and `allPIPS` are loaded
+			// and after that we call `receivePackages`
+
+			// We used only one dependency(`currentPIP`) for useEffect...
+			// out of 3 dependencies(`currentPIP`, `defaultPIP`, `allPIPS`)
+			// so that the `receivePackages` function gets called only one time per page load, instead of 3 times.
+			receivePackages();
+		}
+	}, [currentPIP, PIPContextLoaded]);
 
 	const performSearch = ev => setQuery(ev.target.value.toLowerCase());
 
 	const loader = <CircularProgress />;
-
-	const smallLoader = <CircularProgress size={20} />;
 
 	const noResultsFound = <div>No packages installed</div>;
 
@@ -130,74 +106,19 @@ function Home() {
 					<div>
 						<p />
 						<Grid container justify="center">
-							<Grid item style={{ flex: 1 }}>
-								<TextField
-									fullWidth={true}
-									onKeyUp={performSearch}
-									label="Search local packages"
-									variant="outlined"
-									InputProps={{
-										startAdornment: (
-											<InputAdornment position="start">
-												<SearchOutlined color="primary" />
-											</InputAdornment>
-										),
-									}}
-								/>
-							</Grid>
-
-							<Grid item>
-								{currentPIP === null || allPIPS === null ? (
-									smallLoader
-								) : (
-									<TextField
-										select
-										label="Current PIP"
-										value={currentPIP.pipName}
-										fullWidth={true}
-										onChange={handlePIPChange}
-										variant="outlined"
-										InputProps={{
-											startAdornment: (
-												<InputAdornment position="start">
-													<FaPython color="primary" />
-												</InputAdornment>
-											),
-										}}
-									>
-										{Object.entries(allPIPS).map(
-											([pipName, pipPath], index) => (
-												<MenuItem
-													onClick={ev =>
-														changeCurrentPIP(
-															pipName,
-														)
-													}
-													key={`pip-menu-item-${index}`}
-													value={pipName}
-												>
-													{pipName}
-												</MenuItem>
-											),
-										)}
-
-										<Divider light />
-
-										<MenuItem value={null}>
-											<ListItemIcon>
-												<Add />
-											</ListItemIcon>
-
-											<Typography
-												variant="inherit"
-												align="center"
-											>
-												Add PIP
-											</Typography>
-										</MenuItem>
-									</TextField>
-								)}
-							</Grid>
+							<TextField
+								fullWidth={true}
+								onKeyUp={performSearch}
+								label="Search local packages"
+								variant="outlined"
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position="start">
+											<SearchOutlined color="primary" />
+										</InputAdornment>
+									),
+								}}
+							/>
 						</Grid>
 						<p />
 					</div>
@@ -206,13 +127,12 @@ function Home() {
 				</Grid>
 			</Grid>
 
-
 			<p />
 			<Divider light />
 			<p />
 
 			<Container>
-				<Grid container justify="space-between" style={{padding: 20}}>
+				<Grid container justify="space-between" style={{ padding: 20 }}>
 					<Grid item>
 						{packages !== null ? (
 							<Chip
@@ -247,11 +167,6 @@ function Home() {
 			</Container>
 
 			{/* Modals */}
-
-			<PIPAdditionModal
-				isOpen={pipAdditionModalOpen}
-				handleClose={handlePIPAdditionDialogClose}
-			/>
 
 			{/* Modal to install packages */}
 			<InstallPackagesDialog

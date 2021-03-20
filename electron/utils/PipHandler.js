@@ -44,6 +44,39 @@ class PipHandler {
 		return _allPIPS;
 	}
 
+	// Delete a PIP from `electron-store`
+	deletePIP(mainWindow, pipName) {
+		if (pipName !== this.getDefaultPIP().pipName) {
+			const _allPIPS = this._getAllPIPS();
+
+			// Check whether the requested `pipName` exists
+			// ...in the electron store or not
+			// if it exists then delete it
+			if (Object.keys(_allPIPS).includes(pipName)) {
+				delete _allPIPS[pipName];
+				store.set(ALL_PIPS_KEY, _allPIPS);
+			}
+
+			// If the user has deleted the `CURRENT_PIP`
+			// then set the `CURRENT_PIP` to default
+			if (pipName === this.getCurrentPip().pipName) {
+				this.changeCurrentPIP(mainWindow, pipName, true);
+			} else {
+				// Since `changeCurrentPIP` is not called, we have to manually send PIP data to `mainWindow`
+				// `changeCurrentPIP` sends PIP data to `mainWindow` implicitly
+				this.sendCurrentPIPAndAllPIPS(mainWindow);
+			}
+		}
+	}
+
+	// Send the default PIP to `mainWindow`
+	sendDefaultPIP(mainWindow) {
+		mainWindow.webContents.send(
+			'DEFAULT_PIP_RESULTS',
+			this.getDefaultPIP(),
+		);
+	}
+
 	// Send the current PIP to `mainWindow`
 	sendCurrentPIP(mainWindow) {
 		mainWindow.webContents.send(
@@ -201,6 +234,8 @@ class PipHandler {
 					'UNINSTALL_MESSAGE',
 					uninstallMessage,
 				);
+
+				// getPackages(mainWindow);
 			},
 		);
 	}
@@ -217,7 +252,6 @@ class PipHandler {
 		const allPIPS = this.getAllPIPS();
 
 		exec(`${pipPath} --help`, (error, stdout, stderr) => {
-		
 			// Check whether `pipPath` is a valid PIP path or not
 			if (error) {
 				pipPathError = 'Choose a valid PIP path';
@@ -251,6 +285,8 @@ class PipHandler {
 			if (pipNameValid && pipPathValid) {
 				this.addPIPToAllPIPS(pipName, pipPath);
 				this.setCurrentPIP(pipName, pipPath);
+
+				this.sendCurrentPIPAndAllPIPS(mainWindow);
 			}
 
 			mainWindow.webContents.send(
@@ -267,18 +303,27 @@ class PipHandler {
 		store.set(CURRENT_PIP_KEY, { pipName, pipPath });
 	}
 
-	changeCurrentPIP(mainWindow, pipName) {
+	sendCurrentPIPAndAllPIPS(mainWindow) {
+		this.sendCurrentPIP(mainWindow);
+		this.sendAllPIPS(mainWindow);
+	}
+
+	changeCurrentPIP(mainWindow, pipName, setDefault = false) {
 		const allPIPS = this.getAllPIPS();
 
 		// If the user selects the default PIP
 		// then unset `CURRENT_PIP_KEY`
-		if (pipName === this.defaultPIP.pipName) {
+		// OR
+		// if `setDefault` is `true` then unset the `CURRENT_PIP_KEY
+		if (pipName === this.defaultPIP.pipName || setDefault) {
 			store.delete(CURRENT_PIP_KEY);
-			return;
+		} else {
+			// Set the `CURRENT_PIP_KEY` if default PIP is not selected
+			this.setCurrentPIP(pipName, allPIPS[pipName]);
 		}
 
-		// Set the `CURRENT_PIP_KEY` if default PIP is not selected.
-		this.setCurrentPIP(pipName, allPIPS[pipName]);
+		// Send `CURRENT_PIP_KEY` and `ALL_PIPS`
+		this.sendCurrentPIPAndAllPIPS(mainWindow);
 	}
 
 	openPIPDialog(mainWindow, dialog) {

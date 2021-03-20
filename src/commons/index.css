@@ -1,3 +1,8 @@
 body {
 	margin: 0;
 }
+
+
+.MuiAppBar-root .MuiButton-endIcon {
+	margin-left: 5px;
+}

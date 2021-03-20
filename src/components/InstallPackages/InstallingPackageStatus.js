@@ -85,7 +85,8 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 	}, [installOutput]);
 
 	const goToHome = () => {
-		window.location.reload();
+		handleClose();
+		// window.location.reload();
 	};
 
 	const loader = (

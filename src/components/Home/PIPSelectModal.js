@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { green } from '@material-ui/core/colors';
+import React, { useContext, useState } from 'react';
 
 import {
 	Dialog,
@@ -8,116 +7,236 @@ import {
 	List,
 	ListItem,
 	Grid,
-	ButtonBase,
 	Icon,
 	DialogActions,
 	Radio,
-	withStyles,
 	Button,
+	Typography,
+	LinearProgress,
+	ListItemIcon,
+	ListItemText,
+	IconButton,
 } from '@material-ui/core';
+import { PIPContext } from '../../context/PIPContext';
+import {
+	AddCircleOutline,
+	Delete,
+	DeleteOutlined,
+	StorageOutlined,
+} from '@material-ui/icons';
+import PIPAdditionModal from './PIPAdditionModal';
+import { FaPython } from 'react-icons/fa';
+const { ipcRenderer } = window.require('electron');
 
-const GreenRadio = withStyles({
-	root: {
-		'color': green[400],
-		'&$checked': {
-			color: green[600],
-		},
-	},
-	checked: {},
-})(props => <Radio color="default" {...props} />);
+const GreenRadio = props => (
+	<Radio
+		style={{ marginRight: 30, padding: 0 }}
+		color="secondary"
+		{...props}
+	/>
+);
 
-const ENVS = ['main', '1234567890'];
+const PIPSelectModal = ({ open, handleClose }) => {
+	const [pipAdditionModalOpen, setPIPAdditionModalOpen] = useState(false);
+	const [showPIPChangeLoader, setShowPIPChangeLoader] = useState(false);
 
-const PIPSelectModal = ({ isOpen, handleClose }) => {
-	const [env, setEnv] = useState(ENVS[0]);
-	const [open, setOpen] = React.useState(false);
+	const { currentPIP, allPIPS, defaultPIP, PIPContextLoaded } = useContext(
+		PIPContext,
+	);
 
-	const [selectedValue, setSelectedValue] = React.useState(ENVS[0]);
-
-	const handleChange = event => {
-		setSelectedValue(event.target.value);
+	const handlePIPAdditionDialogClose = ev => {
+		setPIPAdditionModalOpen(false);
 	};
 
-	const handleClickOpen = () => {
-		setOpen(true);
+	const handlePIPAddition = ev => {
+		handleClose();
+		setPIPAdditionModalOpen(true);
 	};
 
-	// const handleClose = () => {
-	// 	setOpen(false);
-	// };
+	const changeCurrentPIP = pipName => {
+		if (pipName !== currentPIP.pipName) {
+			ipcRenderer.invoke('CHANGE_CURRENT_PIP', pipName);
+			setShowPIPChangeLoader(true);
+
+			setTimeout(() => {
+				handleClose();
+				setShowPIPChangeLoader(false);
+				// window.location.reload();
+			}, 2000);
+		}
+	};
+
+	const deletePIP = pipName => {
+		ipcRenderer.invoke('DELETE_PIP', pipName);
+	};
+
+	const changePIPLoader = (
+		<Grid container direction="column" justify="center" alignItems="center">
+			<Grid item>
+				<Typography variant="body1" color="textSecondary">
+					Changing PIP...
+				</Typography>
+				<p />
+				<LinearProgress color="secondary" variant="indeterminate" />
+			</Grid>
+		</Grid>
+	);
+
 	return (
-		<Dialog
-			open={isOpen}
-			onClose={handleClose}
-			aria-labelledby="alert-dialog-title"
-			aria-describedby="alert-dialog-description"
-			fullWidth
-			maxWidth="md"
-		>
-			<DialogTitle id="alert-dialog-title">
-				Select Virtual Environment
-			</DialogTitle>
-			<DialogContent>
-				<List component="div">
-					<ListItem divider>
-						<Grid container>
-							<Grid item xs={4}>
-								<ButtonBase color="textSecondary">
-									Pip Name
-								</ButtonBase>
-							</Grid>
-							<Grid item xs={7}>
-								<ButtonBase color="textSecondary">
-									Pip Path
-								</ButtonBase>
-							</Grid>
-							<Grid item xs={1}>
-								<ButtonBase color="textSecondary">
-									Remove
-								</ButtonBase>
-							</Grid>
+		<div>
+			<Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+				<DialogTitle>
+					<Grid container justify="space-between">
+						<Grid item>
+							<Typography variant="h5">
+								Select Virtual Environment
+							</Typography>
 						</Grid>
-					</ListItem>
-					{ENVS.map((option, index) => (
-						<ListItem divider key={`env-menu-item-${index}`}>
-							<Grid container>
-								<Grid item xs={4}>
-									<GreenRadio
-										checked={selectedValue === 'main'}
-										onChange={handleChange}
-										value={option}
-										name="radio-button-demo"
-										inputProps={{
-											'aria-label': { option },
-										}}
-									/>{' '}
-									{option}
+						<Grid item>
+							<Button
+								color="secondary"
+								onClick={handlePIPAddition}
+								startIcon={<AddCircleOutline />}
+							>
+								Add PIP
+							</Button>
+						</Grid>
+					</Grid>
+				</DialogTitle>
+				<DialogContent>
+					{showPIPChangeLoader ? (
+						changePIPLoader
+					) : (
+						<List component="div">
+							<ListItem divider style={{ padding: 10 }}>
+								<Grid container>
+									{[
+										{
+											name: 'PIP name',
+											gridSize: 3,
+											icon: <FaPython size="1.25rem" />,
+										},
+										{
+											name: 'PIP Path',
+											gridSize: 8,
+											icon: (
+												<StorageOutlined fontSize="small" />
+											),
+										},
+										{
+											name: 'Remove',
+											gridSize: 1,
+											icon: <Delete fontSize="small" />,
+										},
+									].map((columnTitleData, index) => (
+										<Grid
+											key={`columne-title-data-${index}`}
+											item
+											xs={columnTitleData.gridSize}
+										>
+											<Typography color="textSecondary">
+												<ListItem
+													style={{ padding: 0 }}
+												>
+													<ListItemIcon
+														style={{ minWidth: 35 }}
+													>
+														<Typography color="textSecondary">
+															{
+																columnTitleData.icon
+															}
+														</Typography>
+													</ListItemIcon>
+													<ListItemText
+														style={{ marginTop: 0 }}
+														primary={
+															columnTitleData.name
+														}
+													/>
+												</ListItem>
+											</Typography>
+										</Grid>
+									))}
 								</Grid>
-								<Grid item xs={7}>
-									<ButtonBase disableRipple>
-										D:\BioShock Infinite - The Complete
-										Edition [FitGirl Repack]
-									</ButtonBase>
-								</Grid>
-								<Grid item xs={1}>
-									<Icon
-										onClick={() => console.log('deleted')}
-										// className={classes.delete}
-									>
-										delete_outline
-									</Icon>
-								</Grid>
-							</Grid>
-						</ListItem>
-					))}
-				</List>
-			</DialogContent>
-			<DialogActions>
-				<Button onClick={handleClose} color="primary">
-					Close
-				</Button>
-			</DialogActions>
-		</Dialog>
+							</ListItem>
+
+							{PIPContextLoaded
+								? Object.entries(allPIPS).map(
+										([pipName, pipPath], index) => (
+											<ListItem
+												style={{ padding: 10 }}
+												divider
+												key={`pip-select-item-${index}`}
+											>
+												<Grid container>
+													<Grid item xs={3}>
+														<GreenRadio
+															name="current-pip"
+															checked={
+																currentPIP.pipName ===
+																pipName
+															}
+															onClick={() =>
+																changeCurrentPIP(
+																	pipName,
+																)
+															}
+															value={pipName}
+														/>
+														<Typography
+															component="span"
+															variant="body1"
+														>
+															{pipName}
+														</Typography>
+													</Grid>
+													<Grid item xs={8}>
+														<Typography variant="body1">
+															<pre
+																style={{
+																	margin: 0,
+																	padding: 0,
+																}}
+															>
+																{pipPath}
+															</pre>
+														</Typography>
+													</Grid>
+													<Grid item container xs={1}>
+														{pipName !==
+														defaultPIP.pipName ? (
+															<IconButton size="small">
+																<Delete
+																	fontSize="small"
+																	onClick={() =>
+																		deletePIP(
+																			pipName,
+																		)
+																	}
+																/>
+															</IconButton>
+														) : null}
+													</Grid>
+												</Grid>
+											</ListItem>
+										),
+								  )
+								: null}
+						</List>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleClose} color="secondary">
+						Close
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<PIPAdditionModal
+				isOpen={pipAdditionModalOpen}
+				handleClose={handlePIPAdditionDialogClose}
+			/>
+		</div>
 	);
 };
 

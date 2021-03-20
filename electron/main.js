@@ -95,9 +95,15 @@ ipcMain.handle('GET_ALL_PIPS', function (ev) {
 	pipPackagesHandler.sendAllPIPS(mainWindow);
 });
 
+ipcMain.handle('GET_DEFAULT_PIP', function (ev) {
+	pipPackagesHandler.sendDefaultPIP(mainWindow);
+});
 
 ipcMain.handle('CHANGE_CURRENT_PIP', function (ev, pipName) {
 	pipPackagesHandler.changeCurrentPIP(mainWindow, pipName);
 });
 
 
+ipcMain.handle('DELETE_PIP', function (ev, pipName) {
+	pipPackagesHandler.deletePIP(mainWindow, pipName);
+});

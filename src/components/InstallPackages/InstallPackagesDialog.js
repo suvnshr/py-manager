@@ -75,7 +75,6 @@ export default function InstallPackagesDialog({
 	useEffect(() => {
 		ipcRenderer.on('SEARCH_DATA', function (ev, matchedPackages) {
 			setSearchedPackages(matchedPackages);
-			console.log(matchedPackages);
 			setPackageLoading(false);
 		});
 	}, []);
