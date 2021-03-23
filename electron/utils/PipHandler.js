@@ -8,10 +8,12 @@ const store = new Store();
 
 const ALL_PIPS_KEY = 'ALL_PIPS';
 const CURRENT_PIP_KEY = 'CURRENT_PIP';
+const PIP_FLAGS = '--disable-pip-version-check --no-python-version-warning';
 
 class PipHandler {
 	constructor() {
 		this.defaultPIP = this.getDefaultPIP();
+		this.PIP_FLAGS = PIP_FLAGS;
 	}
 
 	getDefaultPIP() {
@@ -108,56 +110,67 @@ class PipHandler {
 	getPackages(mainWindow) {
 		const PIP = this.getCurrentPIPPath();
 
-		exec(`${PIP} list --format json`, (error, stdout, stderr) => {
-			if (error) {
-				console.log(`Error getting packages: ${error.message}`);
-				return;
-			}
+		exec(
+			`${PIP} list --format json ${this.PIP_FLAGS}`,
+			(error, stdout, stderr) => {
+				if (error) {
+					console.log(`Error getting packages: ${error.message}`);
+					return;
+				}
 
-			if (stderr) {
-				console.log(`Output error: ${stderr}`);
-				return;
-			}
+				if (stderr) {
+					console.log(`Output error: ${stderr}`);
+					return;
+				}
 
-			const packagesJson = stdout;
-			const packagesData = JSON.parse(packagesJson.trim());
+				const packagesJson = stdout;
+				const packagesData = JSON.parse(packagesJson.trim());
 
-			mainWindow.webContents.send('SEND_PACKAGES', packagesData);
-		});
+				mainWindow.webContents.send('SEND_PACKAGES', packagesData);
+			},
+		);
 	}
 
 	// getting individual package detail
 	getPackageDetail(mainWindow, packageName) {
 		const PIP = this.getCurrentPIPPath();
 
-		exec(`${PIP} show -V ${packageName}`, (error, stdout, stderr) => {
-			if (error) {
-				console.log(`Error getting package details: ${error.message}`);
-				return;
-			}
-
-			if (stderr) {
-				console.log(`Output error: ${stderr}`);
-				return;
-			}
-
-			const packageDataJson = stdout;
-			const localPackageData = {};
-			const lines = packageDataJson.trim().split('\n');
-
-			lines.forEach(line => {
-				let [key, ...rest] = line.trim().split(': ');
-
-				key = key.toLowerCase().trim();
-				let value = rest.join(': ').trim();
-
-				if (key.length > 0) {
-					localPackageData[key] = value.trim();
+		exec(
+			`${PIP} show -V ${packageName} ${this.PIP_FLAGS}`,
+			(error, stdout, stderr) => {
+				if (error) {
+					console.log(
+						`Error getting package details: ${error.message}`,
+					);
+					return;
 				}
-			});
 
-			mainWindow.webContents.send('SEND_LOCAL_DETAIL', localPackageData);
-		});
+				if (stderr) {
+					console.log(`Output error: ${stderr}`);
+					return;
+				}
+
+				const packageDataJson = stdout;
+				const localPackageData = {};
+				const lines = packageDataJson.trim().split('\n');
+
+				lines.forEach(line => {
+					let [key, ...rest] = line.trim().split(': ');
+
+					key = key.toLowerCase().trim();
+					let value = rest.join(': ').trim();
+
+					if (key.length > 0) {
+						localPackageData[key] = value.trim();
+					}
+				});
+
+				mainWindow.webContents.send(
+					'SEND_LOCAL_DETAIL',
+					localPackageData,
+				);
+			},
+		);
 	}
 
 	searchPythonPackageOnline(mainWindow, packageName, orderBy) {
@@ -218,7 +231,7 @@ class PipHandler {
 		const PIP = this.getCurrentPIPPath();
 
 		exec(
-			`${PIP} uninstall ${packageName} --yes`,
+			`${PIP} uninstall ${packageName} --yes ${this.PIP_FLAGS}`,
 			(error, stdout, stderr) => {
 				let uninstallMessage = `${packageName} is successfully removed`;
 
@@ -251,51 +264,76 @@ class PipHandler {
 		// The list of PIPs including the default PIP
 		const allPIPS = this.getAllPIPS();
 
-		exec(`${pipPath} --help`, (error, stdout, stderr) => {
-			// Check whether `pipPath` is a valid PIP path or not
-			if (error) {
-				pipPathError = 'Choose a valid PIP path';
-				pipPathError = false;
-			}
+		exec(
+			`${pipPath} --version ${this.PIP_FLAGS}`,
+			(error, stdout, stderr) => {
+				// If any errors occurred in the command execution 
+				if (error) {
+					pipPathValid = false;
+					pipPathError = 'Choose a valid PIP path';
+				}
 
-			// Check whether `pipName` is already in the store or not
-			if (typeof allPIPS[pipName] !== 'undefined') {
-				pipNameValid = false;
-				pipNameError = 'A PIP with this name already added';
-			}
+				try {
+					// Check whether the first word of the output is `pip`
+					// and whether the second word is version string or not
 
-			// Check whether `pipPath` is already in the store or not
-			if (Object.values(allPIPS).includes(pipPath)) {
-				pipPathValid = false;
-				pipPathError = 'A PIP with this path is already added';
-			}
+					// ...We check whether a string is a version string or not 
+					// by using `parseFloat`
 
-			// The name of the PIP should be not empty
-			if (pipName.length === 0) {
-				pipNameValid = false;
-				pipNameError = 'PIP name cannot be empty';
-			}
+					let pipVersionOutputArray = stdout.split(' ');
 
-			// The PIP path should be not empty
-			if (pipPath.length === 0) {
-				pipPathValid = false;
-				pipPathError = 'PIP path cannot be empty';
-			}
+					let firstWord = pipVersionOutputArray[0].toLowerCase();
+					let secondWord = parseFloat(pipVersionOutputArray[1]);
 
-			if (pipNameValid && pipPathValid) {
-				this.addPIPToAllPIPS(pipName, pipPath);
-				this.setCurrentPIP(pipName, pipPath);
+					if (!firstWord === 'pip' || isNaN(secondWord)) {
+						pipPathValid = false;
+						pipPathError = 'Choose a valid PIP path';
+					}
+				} catch (err) {
+					console.log('Warning for validating PIP:', err);
+					pipPathValid = false;
+					pipPathError = 'Choose a valid PIP path';
+				}
 
-				this.sendCurrentPIPAndAllPIPS(mainWindow);
-			}
+				// Check whether `pipName` is already in the store or not
+				if (typeof allPIPS[pipName] !== 'undefined') {
+					pipNameValid = false;
+					pipNameError = 'A PIP with this name already added';
+				}
 
-			mainWindow.webContents.send(
-				'PIP_ADDITION_RESULTS',
-				pipNameValid && pipPathValid,
-				pipNameError,
-				pipPathError,
-			);
-		});
+				// Check whether `pipPath` is already in the store or not
+				if (Object.values(allPIPS).includes(pipPath)) {
+					pipPathValid = false;
+					pipPathError = 'A PIP with this path is already added';
+				}
+
+				// The name of the PIP should be not empty
+				if (pipName.length === 0) {
+					pipNameValid = false;
+					pipNameError = 'PIP name cannot be empty';
+				}
+
+				// The PIP path should be not empty
+				if (pipPath.length === 0) {
+					pipPathValid = false;
+					pipPathError = 'PIP path cannot be empty';
+				}
+
+				if (pipNameValid && pipPathValid) {
+					this.addPIPToAllPIPS(pipName, pipPath);
+					this.setCurrentPIP(pipName, pipPath);
+
+					this.sendCurrentPIPAndAllPIPS(mainWindow);
+				}
+
+				mainWindow.webContents.send(
+					'PIP_ADDITION_RESULTS',
+					pipNameValid && pipPathValid,
+					pipNameError,
+					pipPathError,
+				);
+			},
+		);
 	}
 
 	// Set `CURRENT_PIP_KEY` in `electron-store`
@@ -360,7 +398,7 @@ class PipHandler {
 		const PIP = this.getCurrentPIPPath();
 		installCommand = PIP + ' install' + installCommand;
 
-		exec(installCommand, (error, stdout, stderr) => {
+		exec(`${installCommand} ${this.PIP_FLAGS}`, (error, stdout, stderr) => {
 			mainWindow.send('INSTALL_OUTPUT', stdout);
 
 			let packageInstallStatus = {};
@@ -368,12 +406,15 @@ class PipHandler {
 			Object.entries(packagesData).forEach(
 				([packageName, packageVersion]) => {
 					exec(
-						`${PIP} show ${packageName}`,
+						`${PIP} show ${packageName} ${this.PIP_FLAGS}`,
 						(_error, _stdout, _stderr) => {
 							let message = '';
 							let error = false;
 
-							if (stderr.includes('Package(s) not found:')) {
+							if (
+								stderr.includes('Package(s) not found:') ||
+								_error
+							) {
 								message = `Error installing ${packageName}`;
 								error = true;
 							} else {
