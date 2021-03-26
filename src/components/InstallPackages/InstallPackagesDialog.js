@@ -291,6 +291,7 @@ export default function InstallPackagesDialog({
 						handleConfirmInstallClose,
 						handlePackageModalClose: handleClose,
 						setOpenInstallStatusModal,
+						setSearchedPackages
 					}}
 				/>
 			</Dialog>

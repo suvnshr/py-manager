@@ -26,6 +26,7 @@ export default function InstallConfirmDialog({
 	handleConfirmInstallClose,
 	handlePackageModalClose,
 	setOpenInstallStatusModal,
+	setSearchedPackages
 }) {
 	const [finalPackages, setFinalPackages] = useState({});
 
@@ -36,6 +37,11 @@ export default function InstallConfirmDialog({
 		handleConfirmInstallClose();
 		handlePackageModalClose();
 		setOpenInstallStatusModal(true);
+
+		// Reset state
+		setSearchedPackages(null);
+		setPackagesToInstall([]);
+		setFinalPackages({});
 	};
 
 	// Removes a package from `packagesToInstall`
