@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import {
 	AppBar,
@@ -24,6 +24,9 @@ import { Cancel, CheckOutlined, GetApp } from '@material-ui/icons';
 
 import { SlideDialogTransition } from '../../commons/helpers';
 import { useHistory } from 'react-router-dom';
+import { FaPython } from 'react-icons/fa';
+import { PIPContext } from '../../context/PIPContext';
+import PIPPicker from '../../commons/PIPPicker';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -32,8 +35,8 @@ const useStyles = makeStyles(theme => ({
 		position: 'relative',
 	},
 	title: {
-		marginLeft: theme.spacing(2),
-		flex: 1,
+		// marginLeft: theme.spacing(2),
+		// flex: 1,
 	},
 	pre: {
 		background: '#1e1e1e',
@@ -43,9 +46,12 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-export default function InstallPackagesStatus({ isOpen, handleClose }) {
+const INSTALLING_TITLE = 'Installing Packages...';
+const INSTALLED_TITLE = 'Installation Complete';
+
+export default function InstallPackagesStatus({ isOpen, handleClose, currentPIP }) {
 	const classes = useStyles();
-	const [dialogTitle, setDialogTitle] = useState('Installing Packages...');
+	const [dialogTitle, setDialogTitle] = useState(INSTALLING_TITLE);
 	const [installOutput, setInstallOutput] = useState(null);
 	const [packagesInstallStatus, setPackagesInstallStatus] = useState([]);
 
@@ -70,7 +76,7 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 			Object.keys(packagesInstallStatus).length === 0
 		) {
 			setLoading(false);
-			setDialogTitle('Installation Complete');
+			setDialogTitle(INSTALLED_TITLE);
 		}
 	}, [installOutput, packagesInstallStatus]);
 
@@ -86,6 +92,8 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 
 	const goToHome = () => {
 		handleClose();
+		setLoading(true);
+		setInstallOutput(null);
 		// window.location.reload();
 	};
 
@@ -121,7 +129,7 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 						<Typography variant="h6" className={classes.title}>
 							{dialogTitle}
 						</Typography>
-
+						<PIPPicker currentPIP={currentPIP} allowPicking={false} outlined={true} />
 						{!loading ? (
 							<Button
 								autoFocus
@@ -142,12 +150,14 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 						<Grid container>
 							<Grid item xs={2} />
 							<Grid item xs={8}>
-									<p />
-									<Typography variant="h6">
-										Installed packages
-									</Typography>
-								<Box height="38vh" style={{overflowX: "auto"}}>
-
+								<p />
+								<Typography variant="h6">
+									Installed packages
+								</Typography>
+								<Box
+									height="38vh"
+									style={{ overflowX: 'auto' }}
+								>
 									<List>
 										{Object.entries(
 											packagesInstallStatus,

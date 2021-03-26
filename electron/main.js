@@ -107,3 +107,13 @@ ipcMain.handle('CHANGE_CURRENT_PIP', function (ev, pipName) {
 ipcMain.handle('DELETE_PIP', function (ev, pipName) {
 	pipPackagesHandler.deletePIP(mainWindow, pipName);
 });
+
+
+ipcMain.handle("GET_HAS_ON_BOARDED", function () {
+	pipPackagesHandler.sendHasOnBoarded(mainWindow);
+})
+
+
+ipcMain.handle("START_ON_BOARDING", function () {
+	pipPackagesHandler.startOnBoarding(mainWindow);
+})

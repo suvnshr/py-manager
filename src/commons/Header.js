@@ -29,20 +29,13 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import PIPAdditionModal from '../components/Home/PIPAdditionModal';
 import { PIPContext } from '../context/PIPContext';
 import PIPSelectModal from '../components/Home/PIPSelectModal';
+import PIPPicker from './PIPPicker';
 
 const useStyles = makeStyles(theme => ({
 	root: {
 		flexGrow: 1,
 	},
-	menuButton: {
-		marginRight: theme.spacing(2),
-	},
-	pipSelectButton: {
-		marginLeft: 15,
-		padding: 10,
-		fontSize: '1.15em',
-		textTransform: 'none',
-	},
+
 	title: {
 		// flexGrow: 1,
 		display: 'none',
@@ -57,6 +50,15 @@ function Header({}) {
 
 	const { currentPIP, PIPContextLoaded } = useContext(PIPContext);
 	const [pipSelectModalOpen, setPIPSelectModalOpen] = useState(false);
+	const [pipAdditionModalOpen, setPIPAdditionModalOpen] = useState(false);
+
+	const handlePIPAdditionDialogClose = ev => {
+		setPIPAdditionModalOpen(false);
+	};
+
+	const handlePIPAddition = ev => {
+		setPIPAdditionModalOpen(true);
+	};
 
 	const handlePIPSelectOpen = ev => {
 		setPIPSelectModalOpen(true);
@@ -75,25 +77,22 @@ function Header({}) {
 					</ButtonBase>
 
 					{PIPContextLoaded ? (
-						<Button
-							className={classes.pipSelectButton}
-							onClick={handlePIPSelectOpen}
-							startIcon={<FaPython size="0.9em" />}
-							endIcon={
-								<ArrowDropDownIcon
-									className={classes.arrowDropDownIcon}
-								/>
-							}
-						>
-							{currentPIP.pipName}
-						</Button>
+						<PIPPicker currentPIP={currentPIP} handlePIPSelectOpen={handlePIPSelectOpen} />
 					) : null}
 				</Toolbar>
 			</AppBar>
 
+			<PIPAdditionModal
+				open={pipAdditionModalOpen}
+				handleClose={handlePIPAdditionDialogClose}
+			/>
+
 			<PIPSelectModal
 				open={pipSelectModalOpen}
+				pipAdditionModalOpen={pipAdditionModalOpen}
 				handleClose={handlePIPSelectClose}
+				handlePIPAddition={handlePIPAddition}
+				handlePIPAdditionDialogClose={handlePIPAdditionDialogClose}
 			/>
 		</header>
 	);

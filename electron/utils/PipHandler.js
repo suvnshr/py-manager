@@ -8,22 +8,27 @@ const store = new Store();
 
 const ALL_PIPS_KEY = 'ALL_PIPS';
 const CURRENT_PIP_KEY = 'CURRENT_PIP';
+const HAS_ON_BOARDED_KEY = 'HAS_ON_BOARDED';
+const DEFAULT_PIP_KEY = 'DEFAULT_PIP';
 const PIP_FLAGS = '--disable-pip-version-check --no-python-version-warning';
 
 class PipHandler {
 	constructor() {
-		this.defaultPIP = this.getDefaultPIP();
 		this.PIP_FLAGS = PIP_FLAGS;
 	}
 
 	getDefaultPIP() {
-		// TODO: the default PIP command may be different for different platforms
-		return { pipName: 'main', pipPath: 'pip3' };
+		// Return {pipName: null, pipPath: null}
+		return store.get(DEFAULT_PIP_KEY, { pipName: null, pipPath: null });
+	}
+
+	setDefaultPIP(pipName, pipPath) {
+		store.set(DEFAULT_PIP_KEY, { pipName, pipPath });
 	}
 
 	// Getting the current PIP
 	getCurrentPip() {
-		return store.get(CURRENT_PIP_KEY, this.defaultPIP);
+		return store.get(CURRENT_PIP_KEY, this.getDefaultPIP());
 	}
 
 	// Get the current PIP path
@@ -39,7 +44,7 @@ class PipHandler {
 	// Get all the added PIPS including the default PIP
 	getAllPIPS() {
 		const _allPIPS = this._getAllPIPS();
-		const defaultPIP = this.defaultPIP;
+		const defaultPIP = this.getDefaultPIP();
 
 		_allPIPS[defaultPIP.pipName] = defaultPIP.pipPath;
 
@@ -77,6 +82,49 @@ class PipHandler {
 			'DEFAULT_PIP_RESULTS',
 			this.getDefaultPIP(),
 		);
+	}
+
+	// Send `HAS_ON_BOARDED_KEY` value to mainWindow
+	sendHasOnBoarded(mainWindow) {
+		mainWindow.webContents.send(
+			'HAS_ON_BOARDED_RESULTS',
+			store.get(HAS_ON_BOARDED_KEY, false),
+		);
+	}
+
+	// Check for some default pip commands are working or not
+	// If they work then set the defaultPIP as there value
+	// and inform `mainWindow` about `onBoarding` success
+	// If none of them works, then inform `mainWindow` about onBoarding failure
+	startOnBoarding(mainWindow) {
+
+		// Possible PIP commands for all machines
+		let possiblePIPs = ['pip3', 'pip'];
+		let pipWorking = false;
+		let defaultPIPName = 'main';
+
+		possiblePIPs.forEach((pipPath, index) => {
+			if (!pipWorking) {
+				this.validatePIPWithCallBack(defaultPIPName, pipPath, () => {
+					// Set `defaultPIP`
+					this.setDefaultPIP(defaultPIPName, pipPath);
+
+					// Set `HAS_ON_BOARDED_KEY` to true in electron-store
+					store.set(HAS_ON_BOARDED_KEY, true);
+					pipWorking = true;
+
+					// Inform `,ainWindow` about onboarding success
+					this.sendHasOnBoarded(mainWindow);
+
+					if (index === possiblePIPs.length - 1 && !pipWorking) {
+						// No possible pip paths worked on the machine
+
+						// Inform mainWindow about onBoarding` failure
+						mainWindow.webContents.send('ON_BOARDING_FAILED');
+					}
+				});
+			}
+		});
 	}
 
 	// Send the current PIP to `mainWindow`
@@ -253,8 +301,8 @@ class PipHandler {
 		);
 	}
 
-	// Validate the PIP name and path and then add it to `electron-store`
-	validateAndAddPIP(mainWindow, pipName, pipPath) {
+	// Validate pip after the data is received from exec
+	_validatePIPAfterExec(pipName, pipPath, stdout, error) {
 		let pipNameValid = true;
 		let pipNameError = '';
 
@@ -264,68 +312,103 @@ class PipHandler {
 		// The list of PIPs including the default PIP
 		const allPIPS = this.getAllPIPS();
 
+		// If any errors occurred in the command execution
+		if (error) {
+			pipPathValid = false;
+			pipPathError = 'Choose a valid PIP path';
+		}
+
+		try {
+			// Check whether the first word of the output is `pip`
+			// and whether the second word is version string or not
+
+			// ...We check whether a string is a version string or not
+			// by using `parseFloat`
+
+			let pipVersionOutputArray = stdout.split(' ');
+
+			let firstWord = pipVersionOutputArray[0].toLowerCase();
+			let secondWord = parseFloat(pipVersionOutputArray[1]);
+
+			if (!firstWord === 'pip' || isNaN(secondWord)) {
+				pipPathValid = false;
+				pipPathError = 'Choose a valid PIP path';
+			}
+		} catch (err) {
+			console.log('Warning for validating PIP:', err);
+			pipPathValid = false;
+			pipPathError = 'Choose a valid PIP path';
+		}
+
+		// Check whether `pipName` is already in the store or not
+		if (typeof allPIPS[pipName] !== 'undefined') {
+			pipNameValid = false;
+			pipNameError = 'A PIP with this name already added';
+		}
+
+		// Check whether `pipPath` is already in the store or not
+		if (Object.values(allPIPS).includes(pipPath)) {
+			pipPathValid = false;
+			pipPathError = 'A PIP with this path is already added';
+		}
+
+		// The name of the PIP should be not empty
+		if (pipName.length === 0) {
+			pipNameValid = false;
+			pipNameError = 'PIP name cannot be empty';
+		}
+
+		// The PIP path should be not empty
+		if (pipPath.length === 0) {
+			pipPathValid = false;
+			pipPathError = 'PIP path cannot be empty';
+		}
+
+		return { pipNameValid, pipPathValid, pipNameError, pipPathError };
+	}
+
+	// Validate PIP and and provide callbacks to run after exec and after PIP is found to be valid
+	validatePIPWithCallBack(
+		pipName,
+		pipPath,
+		onPIPValid,
+		onExecComplete = () => {},
+	) {
 		exec(
 			`${pipPath} --version ${this.PIP_FLAGS}`,
 			(error, stdout, stderr) => {
-				// If any errors occurred in the command execution 
-				if (error) {
-					pipPathValid = false;
-					pipPathError = 'Choose a valid PIP path';
+				const validationData = this._validatePIPAfterExec(
+					pipName,
+					pipPath,
+					stdout,
+					error,
+				);
+
+				if (
+					validationData.pipNameValid &&
+					validationData.pipPathValid
+				) {
+					onPIPValid(validationData);
 				}
 
-				try {
-					// Check whether the first word of the output is `pip`
-					// and whether the second word is version string or not
+				onExecComplete(validationData);
+			},
+		);
+	}
 
-					// ...We check whether a string is a version string or not 
-					// by using `parseFloat`
+	// Validate the PIP name and path and then add it to `electron-store`
+	validateAndAddPIP(mainWindow, pipName, pipPath) {
+		this.validatePIPWithCallBack(
+			pipName,
+			pipPath,
+			// Runs if pip is valid
+			() => {
+				this.addPIPToAllPIPS(pipName, pipPath);
+				this.setCurrentPIP(pipName, pipPath);
 
-					let pipVersionOutputArray = stdout.split(' ');
-
-					let firstWord = pipVersionOutputArray[0].toLowerCase();
-					let secondWord = parseFloat(pipVersionOutputArray[1]);
-
-					if (!firstWord === 'pip' || isNaN(secondWord)) {
-						pipPathValid = false;
-						pipPathError = 'Choose a valid PIP path';
-					}
-				} catch (err) {
-					console.log('Warning for validating PIP:', err);
-					pipPathValid = false;
-					pipPathError = 'Choose a valid PIP path';
-				}
-
-				// Check whether `pipName` is already in the store or not
-				if (typeof allPIPS[pipName] !== 'undefined') {
-					pipNameValid = false;
-					pipNameError = 'A PIP with this name already added';
-				}
-
-				// Check whether `pipPath` is already in the store or not
-				if (Object.values(allPIPS).includes(pipPath)) {
-					pipPathValid = false;
-					pipPathError = 'A PIP with this path is already added';
-				}
-
-				// The name of the PIP should be not empty
-				if (pipName.length === 0) {
-					pipNameValid = false;
-					pipNameError = 'PIP name cannot be empty';
-				}
-
-				// The PIP path should be not empty
-				if (pipPath.length === 0) {
-					pipPathValid = false;
-					pipPathError = 'PIP path cannot be empty';
-				}
-
-				if (pipNameValid && pipPathValid) {
-					this.addPIPToAllPIPS(pipName, pipPath);
-					this.setCurrentPIP(pipName, pipPath);
-
-					this.sendCurrentPIPAndAllPIPS(mainWindow);
-				}
-
+				this.sendCurrentPIPAndAllPIPS(mainWindow);
+			},
+			({ pipNameValid, pipPathValid, pipNameError, pipPathError }) => {
 				mainWindow.webContents.send(
 					'PIP_ADDITION_RESULTS',
 					pipNameValid && pipPathValid,
@@ -353,7 +436,7 @@ class PipHandler {
 		// then unset `CURRENT_PIP_KEY`
 		// OR
 		// if `setDefault` is `true` then unset the `CURRENT_PIP_KEY
-		if (pipName === this.defaultPIP.pipName || setDefault) {
+		if (pipName === this.getDefaultPIP().pipName || setDefault) {
 			store.delete(CURRENT_PIP_KEY);
 		} else {
 			// Set the `CURRENT_PIP_KEY` if default PIP is not selected

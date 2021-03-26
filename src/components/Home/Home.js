@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 
-
 import {
 	Button,
 	Chip,
@@ -27,9 +26,7 @@ function Home() {
 	);
 	const [openInstallStatusModal, setOpenInstallStatusModal] = useState(false);
 
-	const { currentPIP, PIPContextLoaded, packages } = useContext(
-		PIPContext,
-	);
+	const { currentPIP, PIPContextLoaded, packages } = useContext(PIPContext);
 
 	const handleInstallStatusClose = ev => {
 		setOpenInstallStatusModal(false);
@@ -176,10 +173,14 @@ function Home() {
 				setOpenInstallStatusModal={setOpenInstallStatusModal}
 			/>
 
-			<InstallPackagesStatus
-				isOpen={openInstallStatusModal}
-				handleClose={handleInstallStatusClose}
-			/>
+			{PIPContextLoaded ? (
+				<InstallPackagesStatus
+					currentPIP={currentPIP}
+					isOpen={openInstallStatusModal}
+					currentPIP={currentPIP}
+					handleClose={handleInstallStatusClose}
+				/>
+			) : null}
 		</div>
 	);
 }

@@ -7,12 +7,11 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import './commons/index.css';
 
 import customTheme from './commons/theme';
-import Root from './commons/Root';
 import routes from './commons/routes';
 
-import Home from './components/Home/Home';
 import PackageDetail from './components/PackageDetail/PackageDetail';
 import { PIPContentProvider } from './context/PIPContext';
+import HomeOrOnboarding from './components/Home/HomeOrOnboarding';
 
 ReactDOM.render(
 	<React.StrictMode>
@@ -22,9 +21,7 @@ ReactDOM.render(
 				<Router>
 					<Switch>
 						<Route exact path={routes.HOME}>
-							<Root>
-								<Home />
-							</Root>
+							<HomeOrOnboarding />
 						</Route>
 						<Route path={routes.PACKAGE_DETAIL_WITH_PARAM}>
 							<PackageDetail />
