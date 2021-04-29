@@ -1,4 +1,13 @@
-import { Chip, Grid, Typography } from '@material-ui/core';
+import {
+	Chip,
+	Grid,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	makeStyles,
+	Typography,
+} from '@material-ui/core';
 import React from 'react';
 import {
 	LanguageRounded,
@@ -7,7 +16,9 @@ import {
 	SupervisedUserCircleRounded,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
-import routes from '../../commons/routes';
+import routes from '../commons/routes';
+
+import { Margin } from '../commons/helpers';
 
 const packageProperties = {
 	'author': <SupervisedUserCircleRounded />,
@@ -15,6 +26,15 @@ const packageProperties = {
 	'license': <MenuBookRounded />,
 	'location': <StorageRounded />,
 };
+
+const useStyles = makeStyles(theme => ({
+	primaryText: {
+		textTransform: 'capitalize',
+	},
+	packageTitle: {
+		paddingBottom: 10,
+	},
+}));
 
 function PackageDetailBody({
 	localPackageData,
@@ -24,6 +44,7 @@ function PackageDetailBody({
 	setLocalPackageData,
 }) {
 	const history = useHistory();
+	const classes = useStyles();
 
 	const goToOtherPackage = packageName => {
 		setPackageData(null);
@@ -56,35 +77,49 @@ function PackageDetailBody({
 			<div>
 				<p id="summary-section">{description}</p>
 
-				<p id="chip-section">
-					{Object.entries(packageProperties).map(
-						([propertyName, propertyIcon], index) => (
-							<Chip
-								key={`package-chip-${index}`}
-								icon={propertyIcon}
-								color="secondary"
-								component="span"
-								label={`${localPackageData[propertyName]}`}
-								style={{ margin: 5 }}
-								onClick={() => null}
-							/>
-						),
-					)}
-				</p>
+				<div id="chip-section">
+					<List>
+						{Object.entries(packageProperties).map(
+							([propertyName, propertyIcon], index) => (
+								<ListItem
+									dense={true}
+									divider={true}
+									alignItems="flex-start"
+								>
+									<ListItemIcon>{propertyIcon}</ListItemIcon>
+									<ListItemText
+										primary={propertyName}
+										primaryTypographyProps={{
+											className: classes.primaryText,
+										}}
+										secondary={
+											localPackageData[propertyName]
+										}
+									/>
+								</ListItem>
+							),
+						)}
+					</List>
+				</div>
 
 				<div>
 					{requiredBy[0].length > 0 ? (
 						<div id="required-by-section">
-							<Typography variant="h4">Required By</Typography>
+							<Margin />
+
+							<Typography variant="h5">Required By</Typography>
 							<p>
 								{requiredBy.map(packageName => (
 									<Chip
 										key={`required-by-${packageName}`}
 										label={packageName}
+										variant="outlined"
 										color="secondary"
 										component="span"
 										style={{ margin: 5 }}
-										onClick={() => goToOtherPackage(packageName)}
+										onClick={() =>
+											goToOtherPackage(packageName)
+										}
 									/>
 								))}
 							</p>
@@ -93,14 +128,17 @@ function PackageDetailBody({
 
 					{requires[0].length > 0 ? (
 						<div id="requires-section">
-							<Typography variant="h4">Requires</Typography>
+							<Typography variant="h5">Requires</Typography>
 							<p>
 								{requires.map(packageName => (
 									<Chip
 										key={`requires-${packageName}`}
 										label={packageName}
+										variant="outlined"
 										component="span"
-										onClick={() => goToOtherPackage(packageName)}
+										onClick={() =>
+											goToOtherPackage(packageName)
+										}
 										color="secondary"
 										style={{ margin: 5 }}
 									/>
@@ -120,10 +158,10 @@ function PackageDetailBody({
 				<Grid item sm={2} md={3} lg={3} />
 
 				<Grid item xs={12} sm={8} md={6} lg={6}>
-					<Typography variant="h3">{packageName}</Typography>
-					<Typography variant="subtitle1">
-						v{localPackageData.version}
+					<Typography variant="h4" className={classes.packageTitle}>
+						{packageName}
 					</Typography>
+					<Chip variant="outlined" label={localPackageData.version} />
 
 					<div>{packageDetail()}</div>
 				</Grid>

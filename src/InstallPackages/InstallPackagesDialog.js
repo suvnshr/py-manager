@@ -25,10 +25,11 @@ import {
 
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import { isNotEmpty, SlideDialogTransition } from '../../commons/helpers';
+import { isNotEmpty, SlideDialogTransition } from '../commons/helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import PackageSearchItem from './PackageSearchItem';
 import InstallConfirmDialog from './InstallConfirmDialog';
+import LazyLoadWrapper from '../commons/LazyLoadWrapper';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -291,7 +292,7 @@ export default function InstallPackagesDialog({
 						handleConfirmInstallClose,
 						handlePackageModalClose: handleClose,
 						setOpenInstallStatusModal,
-						setSearchedPackages
+						setSearchedPackages,
 					}}
 				/>
 			</Dialog>

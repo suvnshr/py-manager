@@ -9,9 +9,9 @@ import './commons/index.css';
 import customTheme from './commons/theme';
 import routes from './commons/routes';
 
-import PackageDetail from './components/PackageDetail/PackageDetail';
+import PackageDetail from './PackageDetail/PackageDetail';
 import { PIPContentProvider } from './context/PIPContext';
-import HomeOrOnboarding from './components/Home/HomeOrOnboarding';
+import HomeOrOnboarding from './Home/HomeOrOnboarding';
 
 ReactDOM.render(
 	<React.StrictMode>

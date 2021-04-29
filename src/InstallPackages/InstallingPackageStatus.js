@@ -22,11 +22,12 @@ import {
 import { green, red } from '@material-ui/core/colors';
 import { Cancel, CheckOutlined, GetApp } from '@material-ui/icons';
 
-import { SlideDialogTransition } from '../../commons/helpers';
+import { SlideDialogTransition } from '../commons/helpers';
 import { useHistory } from 'react-router-dom';
 import { FaPython } from 'react-icons/fa';
-import { PIPContext } from '../../context/PIPContext';
-import PIPPicker from '../../commons/PIPPicker';
+import { PIPContext } from '../context/PIPContext';
+import PIPPicker from '../commons/PIPPicker';
+import FullScreenLoader from '../commons/FullScreenLoader';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -49,7 +50,11 @@ const useStyles = makeStyles(theme => ({
 const INSTALLING_TITLE = 'Installing Packages...';
 const INSTALLED_TITLE = 'Installation Complete';
 
-export default function InstallPackagesStatus({ isOpen, handleClose, currentPIP }) {
+export default function InstallPackagesStatus({
+	isOpen,
+	handleClose,
+	currentPIP,
+}) {
 	const classes = useStyles();
 	const [dialogTitle, setDialogTitle] = useState(INSTALLING_TITLE);
 	const [installOutput, setInstallOutput] = useState(null);
@@ -97,17 +102,6 @@ export default function InstallPackagesStatus({ isOpen, handleClose, currentPIP 
 		// window.location.reload();
 	};
 
-	const loader = (
-		<Grid
-			container
-			justify="center"
-			alignContent="center"
-			style={{ height: '80vh' }}
-		>
-			<CircularProgress size={40} />
-		</Grid>
-	);
-
 	return (
 		<div>
 			<Dialog
@@ -129,7 +123,11 @@ export default function InstallPackagesStatus({ isOpen, handleClose, currentPIP 
 						<Typography variant="h6" className={classes.title}>
 							{dialogTitle}
 						</Typography>
-						<PIPPicker currentPIP={currentPIP} allowPicking={false} outlined={true} />
+						<PIPPicker
+							currentPIP={currentPIP}
+							allowPicking={false}
+							outlined={true}
+						/>
 						{!loading ? (
 							<Button
 								autoFocus
@@ -144,7 +142,7 @@ export default function InstallPackagesStatus({ isOpen, handleClose, currentPIP 
 				</AppBar>
 
 				{loading ? (
-					loader
+					<FullScreenLoader />
 				) : (
 					<div>
 						<Grid container>

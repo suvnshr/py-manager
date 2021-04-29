@@ -3,14 +3,20 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const Store = require('electron-store');
 
-const { shell, ipcRenderer } = require('electron');
-const store = new Store();
+const { shell, ipcRenderer, app } = require('electron');
+const NodeCache = require('node-cache');
 
 const ALL_PIPS_KEY = 'ALL_PIPS';
 const CURRENT_PIP_KEY = 'CURRENT_PIP';
 const HAS_ON_BOARDED_KEY = 'HAS_ON_BOARDED';
 const DEFAULT_PIP_KEY = 'DEFAULT_PIP';
 const PIP_FLAGS = '--disable-pip-version-check --no-python-version-warning';
+
+const store = new Store();
+const appCache = new NodeCache({
+	stdTTL: 604800, // 604800 seconds = 1 week
+	checkPeriod: 86400, // 86400 seconds = 1 day
+});
 
 class PipHandler {
 	constructor() {
@@ -97,7 +103,6 @@ class PipHandler {
 	// and inform `mainWindow` about `onBoarding` success
 	// If none of them works, then inform `mainWindow` about onBoarding failure
 	startOnBoarding(mainWindow) {
-
 		// Possible PIP commands for all machines
 		let possiblePIPs = ['pip3', 'pip'];
 		let pipWorking = false;
@@ -482,7 +487,7 @@ class PipHandler {
 		installCommand = PIP + ' install' + installCommand;
 
 		exec(`${installCommand} ${this.PIP_FLAGS}`, (error, stdout, stderr) => {
-			mainWindow.send('INSTALL_OUTPUT', stdout);
+			mainWindow.webContents.send('INSTALL_OUTPUT', stdout);
 
 			let packageInstallStatus = {};
 
@@ -514,7 +519,7 @@ class PipHandler {
 								Object.keys(packageInstallStatus).length ===
 								Object.keys(packagesData).length
 							) {
-								mainWindow.send(
+								mainWindow.webContents.send(
 									'PACKAGE_STATUS_AFTER_INSTALL',
 									packageInstallStatus,
 								);
@@ -524,6 +529,34 @@ class PipHandler {
 				},
 			);
 		});
+	}
+
+	async getPackageDataFromPyPI(mainWindow, packageName, defaultValue = -1) {
+		const cacheKeyName = 'pypi-package-data-' + packageName;
+
+		let packageData = appCache.get(cacheKeyName);
+
+		// Handling miss
+		if (packageData == undefined) {
+			try {
+				const res = await axios.get(
+					`https://pypi.org/pypi/${packageName}/json`,
+				);
+				packageData = res.data;
+
+				// Adding `packageData` to cache
+				appCache.set(cacheKeyName, packageData);
+			} catch (err) {
+				console.log(`Error fetching ${packageName}'s data from PYPI:`);
+
+				packageData = defaultValue;
+			}
+		}
+
+		mainWindow.webContents.send(
+			'PYPI_PACKAGE_DATA_OF_' + packageName,
+			packageData,
+		);
 	}
 }
 

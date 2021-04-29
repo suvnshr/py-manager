@@ -9,7 +9,8 @@ import {
 } from '@material-ui/core';
 import { ArrowBackOutlined } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
-import routes from '../../commons/routes';
+import routes from '../commons/routes';
+import theme from '../commons/theme';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -38,11 +39,9 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 	};
 
 	useEffect(() => {
-
 		let uninstallPromptShowed = false;
 
 		if (!uninstallPromptShowed) {
-		
 			ipcRenderer.on(
 				'UNINSTALL_MESSAGE',
 				function (ev, uninstallMessage) {
@@ -51,10 +50,8 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 					goBack();
 				},
 			);
-
 		}
 	}, []);
-
 
 	const uninstallPackage = () => {
 		let requiredBy = localPackageData['required-by'];
@@ -86,7 +83,7 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 						<ArrowBackOutlined />
 					</IconButton>
 					<Typography className={classes.title} variant="h5" noWrap>
-						{packageName}
+						About <b>{packageName}</b>
 					</Typography>
 
 					{updatable ? (
@@ -101,9 +98,15 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 
 					<Button
 						variant="contained"
-						color="secondary"
-						style={{ margin: '0 7px' }}
+						style={{
+							margin: '0 7px',
+							backgroundColor: theme.palette.error.dark,
+							color: theme.palette.getContrastText(
+								theme.palette.error.dark,
+							),
+						}}
 						onClick={uninstallPackage}
+						size="small"
 					>
 						Remove
 					</Button>

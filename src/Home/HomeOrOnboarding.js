@@ -9,9 +9,10 @@ import {
 	Grid,
 	LinearProgress,
 } from '@material-ui/core';
-import { PIPContext } from '../../context/PIPContext';
-import Root from '../../commons/Root';
+import { PIPContext } from '../context/PIPContext';
+import Root from '../commons/Root';
 import Home from './Home';
+import FullScreenLoader from '../commons/FullScreenLoader';
 const { ipcRenderer } = window.require('electron');
 
 function HomeOrOnboarding() {
@@ -27,21 +28,8 @@ function HomeOrOnboarding() {
 		});
 	}, []);
 
-	const loader = (
-		<Grid
-			container
-			style={{ height: '80vh' }}
-			justify="center"
-			alignItems="center"
-		>
-			<Grid item>
-				<CircularProgress />
-			</Grid>
-		</Grid>
-	);
-
 	// If onBoarding status is not yet updated then show loader
-	if (hasOnBoarded === null) return loader;
+	if (hasOnBoarded === null) return <FullScreenLoader />;
 
 	// if user has already on boarded
 	else if (hasOnBoarded) {

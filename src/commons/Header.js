@@ -26,9 +26,9 @@ import { FaPython } from 'react-icons/fa';
 
 import { Add } from '@material-ui/icons';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import PIPAdditionModal from '../components/Home/PIPAdditionModal';
+import PIPAdditionModal from '../Home/PIPAdditionModal';
 import { PIPContext } from '../context/PIPContext';
-import PIPSelectModal from '../components/Home/PIPSelectModal';
+import PIPSelectModal from '../Home/PIPSelectModal';
 import PIPPicker from './PIPPicker';
 
 const useStyles = makeStyles(theme => ({

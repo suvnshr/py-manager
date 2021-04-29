@@ -16,6 +16,9 @@ import {
 } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 
+const { ipcRenderer } = window.require('electron');
+
+
 export default function InstallConfirmPackageListItem({
 	packageName,
 	removePackageFromInstallList,
@@ -23,7 +26,7 @@ export default function InstallConfirmPackageListItem({
 	setFinalPackages,
 }) {
 	const [currentVersion, setCurrentVersion] = useState(null);
-	const [packageData, setPackageData] = useState([]);
+	const [packageData, setPackageData] = useState({});
 
 	const [loading, setLoading] = useState(true);
 
@@ -32,19 +35,18 @@ export default function InstallConfirmPackageListItem({
 	};
 
 	useEffect(() => {
-		const fetchPackageData = async () => {
-			await axios
-				.get(`https://pypi.org/pypi/${packageName}/json`)
-				.then(res => {
-					const latestVersion = res.data.info.version;
+		ipcRenderer.invoke('GET_PYPI_PACKAGE_DATA', packageName);
 
-					setPackageData(res.data);
-					setCurrentVersion(latestVersion);
-					setLoading(false);
-				});
-		};
+		ipcRenderer.on(
+			'PYPI_PACKAGE_DATA_OF_' + packageName,
+			(ev, _packageData) => {
+				const latestVersion = _packageData.info.version;
 
-		fetchPackageData();
+				setPackageData(_packageData);
+				setCurrentVersion(latestVersion);
+				setLoading(false);
+			},
+		);
 	}, []);
 
 	useEffect(() => {

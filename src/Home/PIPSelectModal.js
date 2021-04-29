@@ -17,7 +17,7 @@ import {
 	ListItemText,
 	IconButton,
 } from '@material-ui/core';
-import { PIPContext } from '../../context/PIPContext';
+import { PIPContext } from '../context/PIPContext';
 import {
 	AddCircleOutline,
 	Delete,
@@ -26,7 +26,7 @@ import {
 } from '@material-ui/icons';
 import PIPAdditionModal from './PIPAdditionModal';
 import { FaPython } from 'react-icons/fa';
-import { SlideDialogTransition } from '../../commons/helpers';
+import { SlideDialogTransition } from '../commons/helpers';
 const { ipcRenderer } = window.require('electron');
 
 const GreenRadio = props => (

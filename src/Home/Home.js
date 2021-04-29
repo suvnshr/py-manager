@@ -15,7 +15,8 @@ import { GetApp, SearchOutlined } from '@material-ui/icons';
 import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
 import PackageCard from './PackageCard';
-import { PIPContext } from '../../context/PIPContext';
+import { PIPContext } from '../context/PIPContext';
+import LazyLoadWrapper from '../commons/LazyLoadWrapper';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -88,7 +89,9 @@ function Home() {
 				lg={4}
 				key={'package-card-' + index}
 			>
-				<PackageCard {...packageData} />
+				<LazyLoadWrapper height={190}>
+					<PackageCard {...packageData} />
+				</LazyLoadWrapper>
 			</Grid>
 		));
 	};

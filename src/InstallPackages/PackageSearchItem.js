@@ -10,8 +10,8 @@ import {
 } from '@material-ui/core';
 import { InfoOutlined, OpenInNewOutlined } from '@material-ui/icons';
 
-import { isPackageInstalled } from '../../commons/helpers';
-import routes from '../../commons/routes';
+import { isPackageInstalled } from '../commons/helpers';
+import routes from '../commons/routes';
 import { useHistory } from 'react-router-dom';
 const { ipcRenderer } = window.require('electron');
 

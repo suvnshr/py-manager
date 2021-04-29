@@ -12,10 +12,11 @@ import {
 	Typography,
 } from '@material-ui/core';
 
-import { SlideDialogTransition } from '../../commons/helpers';
+import { SlideDialogTransition } from '../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
 import { GetApp } from '@material-ui/icons';
-import customTheme from '../../commons/theme';
+import customTheme from '../commons/theme';
+import LazyLoadWrapper from '../commons/LazyLoadWrapper';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -26,7 +27,7 @@ export default function InstallConfirmDialog({
 	handleConfirmInstallClose,
 	handlePackageModalClose,
 	setOpenInstallStatusModal,
-	setSearchedPackages
+	setSearchedPackages,
 }) {
 	const [finalPackages, setFinalPackages] = useState({});
 
@@ -76,9 +77,12 @@ export default function InstallConfirmDialog({
 		>
 			<DialogTitle>
 				<div>Choose version</div>
-			<Typography variant="subtitle2" style={{color: customTheme.palette.grey[400]}}>
-				&nbsp;By default the latest versions are selected
-			</Typography>
+				<Typography
+					variant="subtitle2"
+					style={{ color: customTheme.palette.grey[400] }}
+				>
+					&nbsp;By default the latest versions are selected
+				</Typography>
 			</DialogTitle>
 			<DialogContent>
 				<List>
@@ -88,15 +92,17 @@ export default function InstallConfirmDialog({
 						</Grid>
 					) : (
 						packagesToInstall.map((packageName, index) => (
-							<InstallConfirmPackageListItem
-								key={`install-confirm-package-list-item-${packageName}-${index}`}
-								{...{
-									packageName,
-									removePackageFromInstallList,
-									getFinalPackages,
-									setFinalPackages,
-								}}
-							/>
+							<LazyLoadWrapper height={65}>
+								<InstallConfirmPackageListItem
+									key={`install-confirm-package-list-item-${packageName}-${index}`}
+									{...{
+										packageName,
+										removePackageFromInstallList,
+										getFinalPackages,
+										setFinalPackages,
+									}}
+								/>
+							</LazyLoadWrapper>
 						))
 					)}
 				</List>

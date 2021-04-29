@@ -8,7 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import { Grid, LinearProgress } from '@material-ui/core';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-import routes from '../../commons/routes';
+import routes from '../commons/routes';
+
+const { ipcRenderer } = window.require('electron');
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -51,14 +53,12 @@ export default function PackageCard({
 	const [packageData, setPackageData] = useState(null);
 
 	useEffect(() => {
-		axios
-			.get(`https://pypi.org/pypi/${packageName}/json`, {})
-			.then(res => {
-				setPackageData(res.data);
-			})
-			.catch(err => {
-				setPackageData(-1);
-			});
+		ipcRenderer.invoke('GET_PYPI_PACKAGE_DATA', packageName);
+
+		ipcRenderer.on(
+			'PYPI_PACKAGE_DATA_OF_' + packageName,
+			(ev, _packageData) => setPackageData(_packageData),
+		);
 	}, []);
 
 	const loader = (
@@ -70,9 +70,7 @@ export default function PackageCard({
 	);
 
 	const goToDetailPage = ev => {
-		history.push(
-			routes.PACKAGE_DETAIL + packageName
-		);
+		history.push(routes.PACKAGE_DETAIL + packageName);
 	};
 
 	return (

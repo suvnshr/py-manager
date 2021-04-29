@@ -19,7 +19,7 @@ import {
 	FormHelperText,
 	Typography,
 } from '@material-ui/core';
-import { isNotEmpty, SlideDialogTransition } from '../../commons/helpers';
+import { isNotEmpty, SlideDialogTransition } from '../commons/helpers';
 import { useForm, Controller } from 'react-hook-form';
 
 const { ipcRenderer } = window.require('electron');

@@ -117,3 +117,7 @@ ipcMain.handle("GET_HAS_ON_BOARDED", function () {
 ipcMain.handle("START_ON_BOARDING", function () {
 	pipPackagesHandler.startOnBoarding(mainWindow);
 })
+
+ipcMain.handle("GET_PYPI_PACKAGE_DATA", function (ev, packageName, defaultValue=-1) {
+	pipPackagesHandler.getPackageDataFromPyPI(mainWindow, packageName, defaultValue);
+});
