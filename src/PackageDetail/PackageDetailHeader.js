@@ -42,7 +42,7 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 		let uninstallPromptShowed = false;
 
 		if (!uninstallPromptShowed) {
-			ipcRenderer.on(
+			ipcRenderer.once(
 				'UNINSTALL_MESSAGE',
 				function (ev, uninstallMessage) {
 					window.alert(uninstallMessage);

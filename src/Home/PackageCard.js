@@ -55,7 +55,7 @@ export default function PackageCard({
 	useEffect(() => {
 		ipcRenderer.invoke('GET_PYPI_PACKAGE_DATA', packageName);
 
-		ipcRenderer.on(
+		ipcRenderer.once(
 			'PYPI_PACKAGE_DATA_OF_' + packageName,
 			(ev, _packageData) => setPackageData(_packageData),
 		);
