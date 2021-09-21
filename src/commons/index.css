@@ -1,8 +1,32 @@
 body {
 	margin: 0;
+	--scroller-color: hsl(207, 47%, 42%);
+	--scrollbar-background: #3f3f3f;
 }
-
 
 .MuiAppBar-root .MuiButton-endIcon {
 	margin-left: 5px;
+}
+
+
+body::-webkit-scrollbar {
+	width: 15px;
+}
+
+body {
+	scrollbar-width: thick;
+	scrollbar-color: var(--scroller-color) var(--scroller-color);
+}
+body::-webkit-scrollbar-track {
+	background: var(--scrollbar-background);
+}
+body::-webkit-scrollbar-thumb {
+	background-color: var(--scroller-color);
+	border-radius: 20px;
+	border: 2px solid var(--scrollbar-background);
+
+	-webkit-box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+		0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+		0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 }
