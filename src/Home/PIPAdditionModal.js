@@ -133,7 +133,29 @@ export default function PIPAdditionModal({ open, handleClose }) {
 
 					<p />
 
-					<FormControl
+					<TextField
+						label="PIP Path"
+						name="pipPath"
+						error={isNotEmpty(errors.pipName)}
+						helperText={errors.pipName && errors.pipName.message}
+						type="text"
+						color="secondary"
+						variant="outlined"
+						inputProps={{readOnly: true}}
+						fullWidth
+						inputRef={register}
+						InputProps={{
+							endAdornment: (
+								<InputAdornment position="end">
+									<IconButton onClick={pickPIP} edge="end">
+										<FolderOpenOutlined />
+									</IconButton>
+								</InputAdornment>
+							),
+						}}
+					/>
+
+					{/* <FormControl
 						fullWidth={true}
 						color="secondary"
 						variant="outlined"
@@ -148,17 +170,8 @@ export default function PIPAdditionModal({ open, handleClose }) {
 						<OutlinedInput
 							id="pip-input"
 							error={isNotEmpty(errors.pipPath)}
-							readOnly={true}
-							labelWidth={57}
 							inputRef={register}
 							name="pipPath"
-							endAdornment={
-								<InputAdornment position="end">
-									<IconButton onClick={pickPIP} edge="end">
-										<FolderOpenOutlined />
-									</IconButton>
-								</InputAdornment>
-							}
 						/>
 						<FormHelperText
 							color="secondary"
@@ -166,7 +179,7 @@ export default function PIPAdditionModal({ open, handleClose }) {
 						>
 							{errors.pipPath && errors.pipPath.message}
 						</FormHelperText>
-					</FormControl>
+					</FormControl> */}
 					<p />
 				</DialogContent>
 				<DialogActions>
