@@ -22,7 +22,7 @@ function HomeOrOnboarding() {
 	
 	useEffect(() => {
 		ipcRenderer.on('ON_BOARDING_FAILED', () => {
-
+		
 			// on boarding failed
 			setOnBoardingFailed(true);
 		});
@@ -45,11 +45,11 @@ function HomeOrOnboarding() {
 	else {
 		return (
 			<Dialog open>
-				<DialogTitle>Setting up...</DialogTitle>
+				<DialogTitle>{onBoardingFailed ? "pip not found" : "Setting up..." }</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
 						{onBoardingFailed ? (
-							<div>On Boarding Failed</div>
+							<div>On Boarding Failed. Please install pip on your machine</div>
 						) : (
 							<div>
 								PyManager is currently finding default pip

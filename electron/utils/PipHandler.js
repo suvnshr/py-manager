@@ -99,7 +99,7 @@ class PipHandler {
 	}
 
 	// Check for some default pip commands are working or not
-	// If they work then set the defaultPIP as there value
+	// If they work then set the `defaultPIP` as there value
 	// and inform `mainWindow` about `onBoarding` success
 	// If none of them works, then inform `mainWindow` about onBoarding failure
 	startOnBoarding(mainWindow) {
@@ -118,13 +118,14 @@ class PipHandler {
 					store.set(HAS_ON_BOARDED_KEY, true);
 					pipWorking = true;
 
-					// Inform `,ainWindow` about onboarding success
+					// Inform `mainWindow` about onboarding success
 					this.sendHasOnBoarded(mainWindow);
-
+					
+				}, () => {
+					// No possible pip paths worked on the machine
 					if (index === possiblePIPs.length - 1 && !pipWorking) {
-						// No possible pip paths worked on the machine
 
-						// Inform mainWindow about onBoarding` failure
+						// Inform mainWindow about onBoarding failure
 						mainWindow.webContents.send('ON_BOARDING_FAILED');
 					}
 				});
