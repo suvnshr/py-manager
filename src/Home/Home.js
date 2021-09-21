@@ -87,7 +87,7 @@ function Home() {
 				sm={6}
 				md={4}
 				lg={4}
-				key={'package-card-' + index}
+				key={'package-card-' + packageData.name + index}
 			>
 				<LazyLoadWrapper height={190}>
 					<PackageCard {...packageData} />
