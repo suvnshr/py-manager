@@ -3,7 +3,7 @@ const path = require('path');
 const isDev = require('electron-is-dev');
 // const getPackages = require('./utils/getPackages');
 // const getPackageDetail = require('./utils/getPackageDetail');
-const PipHandler = require('./utils/PipHandler');
+const PipHandler = require('./utils/PipHandler.js');
 
 let mainWindow;
 const pipPackagesHandler = new PipHandler();
@@ -12,6 +12,8 @@ function createWindow() {
 	mainWindow = new BrowserWindow({
 		webPreferences: {
 			nodeIntegration: true,
+			webSecurity: false,
+		
 		},
 	});
 
@@ -21,7 +23,7 @@ function createWindow() {
 	mainWindow.loadURL(
 		isDev
 			? 'http://localhost:3000'
-			: `file://${path.join(__dirname, 'src/build/index.html')}`,
+			: `file://${path.join(__dirname, '../build/index.html')}`,
 	);
 
 	// Install the extension if developer mode is ON
