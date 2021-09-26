@@ -17,6 +17,7 @@ function PackageDetail() {
 	const [updatable, setUpdatable] = useState(false);
 
 	useEffect(() => {
+
 		ipcRenderer.invoke('RECEIVE_LOCAL_DETAIL', packageName);
 
 		ipcRenderer.on('SEND_LOCAL_DETAIL', function (ev, _localPackageData) {

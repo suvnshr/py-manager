@@ -121,3 +121,7 @@ ipcMain.handle("START_ON_BOARDING", function () {
 ipcMain.handle("GET_PYPI_PACKAGE_DATA", function (ev, packageName, defaultValue=-1) {
 	pipPackagesHandler.getPackageDataFromPyPI(mainWindow, packageName, defaultValue);
 });
+
+ipcMain.handle("GET_IS_DEFAULT_PIP_WORKING", function () {
+	pipPackagesHandler.isDefaultPIPWorkingAfterOnboarding(mainWindow);
+})

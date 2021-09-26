@@ -9,6 +9,7 @@ function PIPContentProvider(props) {
 	const [currentPIP, setCurrentPIP] = useState(null);
 	const [defaultPIP, setDefaultPIP] = useState(null);
 	const [PIPContextLoaded, setPIPContextLoaded] = useState(false);
+	const [isDefaultPIPWorking, setIsDefaultPIPWorking] = useState(null);
 
 	const [hasOnBoarded, setHasOnBoarded] = useState(null);
 
@@ -29,8 +30,11 @@ function PIPContentProvider(props) {
 		}
 
 		ipcRenderer.on('SEND_PACKAGES', function (ev, packagesData) {
-			// console.log('Received packages');
 			setPackages(packagesData);
+		});
+
+		ipcRenderer.on("IS_DEFAULT_PIP_WORKING", (ev, _isDefaultPIPWorking) => {
+			setIsDefaultPIPWorking(_isDefaultPIPWorking);
 		});
 	}, []);
 
@@ -45,7 +49,7 @@ function PIPContentProvider(props) {
 		// the `electron-store`
 		// then `currentPIP` will be null, because with no extra PIP added, `currentPIP` points to the default PIP
 		// and `defaultPIP` is set to `null` when onBoarding is not performed
-		if (hasOnBoarded === true) {
+		if (hasOnBoarded) {
 			// Only set `currentPIP` once
 			if (currentPIP === null) {
 				// Request `currentPIP` from electron
@@ -83,6 +87,9 @@ function PIPContentProvider(props) {
 					},
 				);
 			}
+
+			ipcRenderer.invoke("GET_IS_DEFAULT_PIP_WORKING");
+
 		}
 	}, [hasOnBoarded]);
 
@@ -101,6 +108,7 @@ function PIPContentProvider(props) {
 				PIPContextLoaded,
 				packages,
 				hasOnBoarded,
+				isDefaultPIPWorking
 			}}
 		>
 			{props.children}

@@ -1,10 +1,10 @@
-const { exec } = require('child_process');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const Store = require('electron-store');
 
-const { shell, ipcRenderer, app } = require('electron');
+const { shell } = require('electron');
 const NodeCache = require('node-cache');
+const { execCommand } = require('./promExec');
 
 const ALL_PIPS_KEY = 'ALL_PIPS';
 const CURRENT_PIP_KEY = 'CURRENT_PIP';
@@ -98,19 +98,28 @@ class PipHandler {
 		);
 	}
 
+	async isDefaultPIPWorkingAfterOnboarding(mainWindow) {
+		const { pipPath } = this.getDefaultPIP();
+		const { output } = await execCommand(`${pipPath} --version ${this.PIP_FLAGS}`);
+		mainWindow.webContents.send("IS_DEFAULT_PIP_WORKING", typeof output !== "undefined")
+	}
+
 	// Check for some default pip commands are working or not
 	// If they work then set the `defaultPIP` as there value
 	// and inform `mainWindow` about `onBoarding` success
 	// If none of them works, then inform `mainWindow` about onBoarding failure
-	startOnBoarding(mainWindow) {
+	async startOnBoarding(mainWindow) {
 		// Possible PIP commands for all machines
 		let possiblePIPs = ['pip3', 'pip'];
 		let pipWorking = false;
 		let defaultPIPName = 'main';
 
-		possiblePIPs.forEach((pipPath, index) => {
+		for (const pipPath of possiblePIPs) {
 			if (!pipWorking) {
-				this.validatePIPWithCallBack(defaultPIPName, pipPath, () => {
+
+				const { pipValid } = await this.validatePIP(defaultPIPName, pipPath);
+
+				if (pipValid) {
 					// Set `defaultPIP`
 					this.setDefaultPIP(defaultPIPName, pipPath);
 
@@ -120,17 +129,17 @@ class PipHandler {
 
 					// Inform `mainWindow` about onboarding success
 					this.sendHasOnBoarded(mainWindow);
-					
-				}, () => {
-					// No possible pip paths worked on the machine
-					if (index === possiblePIPs.length - 1 && !pipWorking) {
+				}
+			} else { break; }
+		}
 
-						// Inform mainWindow about onBoarding failure
-						mainWindow.webContents.send('ON_BOARDING_FAILED');
-					}
-				});
-			}
-		});
+
+		// No possible pip paths worked on the machine
+		if (!pipWorking) {
+
+			// Inform mainWindow about onBoarding failure
+			mainWindow.webContents.send('IS_DEFAULT_PIP_WORKING', false);
+		}
 	}
 
 	// Send the current PIP to `mainWindow`
@@ -161,73 +170,48 @@ class PipHandler {
 	}
 
 	// getting installed packages
-	getPackages(mainWindow) {
+	async getPackages(mainWindow) {
 		const PIP = this.getCurrentPIPPath();
 
-		exec(
-			`${PIP} list --format json ${this.PIP_FLAGS}`,
-			(error, stdout, stderr) => {
-				if (error) {
-					console.log(`Error getting packages: ${error.message}`);
-					return;
-				}
+		const { output } = await execCommand(`${PIP} list --format json ${this.PIP_FLAGS}`);
 
-				if (stderr) {
-					console.log(`Output error: ${stderr}`);
-					return;
-				}
+		if (typeof output !== "undefined") {
+			const packagesJson = output;
+			const packagesData = JSON.parse(packagesJson);
 
-				const packagesJson = stdout;
-				const packagesData = JSON.parse(packagesJson.trim());
-
-				mainWindow.webContents.send('SEND_PACKAGES', packagesData);
-			},
-		);
+			mainWindow.webContents.send('SEND_PACKAGES', packagesData);
+		}
 	}
 
 	// getting individual package detail
-	getPackageDetail(mainWindow, packageName) {
+	async getPackageDetail(mainWindow, packageName) {
 		const PIP = this.getCurrentPIPPath();
 
-		exec(
-			`${PIP} show -V ${packageName} ${this.PIP_FLAGS}`,
-			(error, stdout, stderr) => {
-				if (error) {
-					console.log(
-						`Error getting package details: ${error.message}`,
-					);
-					return;
+		const { output: packageDataJson } = await execCommand(`${PIP} show -V ${packageName} ${this.PIP_FLAGS}`);
+
+		if (typeof packageDataJson !== "undefined") {
+			const localPackageData = {};
+			const lines = packageDataJson.split('\n');
+
+			lines.forEach(line => {
+				let [key, ...rest] = line.trim().split(': ');
+
+				key = key.toLowerCase().trim();
+				let value = rest.join(': ').trim();
+
+				if (key.length > 0) {
+					localPackageData[key] = value.trim();
 				}
+			});
 
-				if (stderr) {
-					console.log(`Output error: ${stderr}`);
-					return;
-				}
-
-				const packageDataJson = stdout;
-				const localPackageData = {};
-				const lines = packageDataJson.trim().split('\n');
-
-				lines.forEach(line => {
-					let [key, ...rest] = line.trim().split(': ');
-
-					key = key.toLowerCase().trim();
-					let value = rest.join(': ').trim();
-
-					if (key.length > 0) {
-						localPackageData[key] = value.trim();
-					}
-				});
-
-				mainWindow.webContents.send(
-					'SEND_LOCAL_DETAIL',
-					localPackageData,
-				);
-			},
-		);
+			mainWindow.webContents.send(
+				'SEND_LOCAL_DETAIL',
+				localPackageData,
+			);
+		}
 	}
 
-	searchPythonPackageOnline(mainWindow, packageName, orderBy) {
+	async searchPythonPackageOnline(mainWindow, packageName, orderBy) {
 		let filter = '';
 		const filterOptions = {
 			Relevance: '',
@@ -239,76 +223,74 @@ class PipHandler {
 			filter = filterOptions[orderBy];
 		}
 
-		axios
-			.get(`https://pypi.org/search/?q=${packageName}&o=${filter}`)
-			.then(res => {
-				const $ = cheerio.load(res.data);
+		let pypiRes;
 
-				const matchedPackages = {};
+		try {
+			pypiRes = await axios
+				.get(`https://pypi.org/search/?q=${packageName}&o=${filter}`);
+		} catch (err) {
+			console.log(`Error searching PyPi: ${err}`);
+			mainWindow.webContents.send('SEARCH_DATA', -1);
+		}
 
-				// a.package-snippet's
-				for (const packageAnchorTag of $('a.package-snippet')) {
-					// a.package-snippet > h3.package-snippet__title > span.package-snippet__name
-					const packageName =
-						packageAnchorTag.children[1].children[1].children[0]
-							.data;
+		if (typeof pypiRes !== "undefined") {
 
-					// a.package-snippet > p.package-snippet__description
-					const packageDescriptionPTag = packageAnchorTag.children[3];
+			const $ = cheerio.load(pypiRes.data);
 
-					let packageDescription = '';
+			const matchedPackages = {};
 
-					// Check if the content of P tag is empty or not
-					if (packageDescriptionPTag.children.length) {
-						packageDescription =
-							packageDescriptionPTag.children[0].data;
-					}
+			// a.package-snippet's
+			for (const packageAnchorTag of $('a.package-snippet')) {
+				// a.package-snippet > h3.package-snippet__title > span.package-snippet__name
+				const packageName =
+					packageAnchorTag.children[1].children[1].children[0]
+						.data;
 
-					let pypiPackageData = {
-						href:
-							'https://pypi.org' + packageAnchorTag.attribs.href,
-						packageDescription,
-					};
+				// a.package-snippet > p.package-snippet__description
+				const packageDescriptionPTag = packageAnchorTag.children[3];
 
-					matchedPackages[packageName] = pypiPackageData;
+				let packageDescription = '';
+
+				// Check if the content of P tag is empty or not
+				if (packageDescriptionPTag.children.length) {
+					packageDescription =
+						packageDescriptionPTag.children[0].data;
 				}
 
-				mainWindow.webContents.send('SEARCH_DATA', matchedPackages);
-			})
-			.catch(err => {
-				console.log(`Error searching PyPi: ${err}`);
-				mainWindow.webContents.send('SEARCH_DATA', -1);
-			});
+				matchedPackages[packageName] = {
+					href:
+						'https://pypi.org' + packageAnchorTag.attribs.href,
+					packageDescription,
+				};;
+			}
+
+			mainWindow.webContents.send('SEARCH_DATA', matchedPackages);
+		}
+
+
 	}
 
-	uninstallPackage(mainWindow, packageName) {
+	async uninstallPackage(mainWindow, packageName) {
 		const PIP = this.getCurrentPIPPath();
 
-		exec(
-			`${PIP} uninstall ${packageName} --yes ${this.PIP_FLAGS}`,
-			(error, stdout, stderr) => {
-				let uninstallMessage = `${packageName} is successfully removed`;
+		const { error, stderr } = await execCommand(`${PIP} uninstall ${packageName} --yes ${this.PIP_FLAGS}`);
 
-				if (error) {
-					uninstallMessage = `Error while uninstalling ${packageName}: ${error}`;
-				}
+		let uninstallMessage = `${packageName} is successfully removed`;
 
-				if (stderr) {
-					uninstallMessage = `Error while uninstalling ${packageName}: ${stderr}`;
-				}
+		if (error || stderr) {
+			uninstallMessage = `Error while uninstalling ${packageName}: ${error}`;
+		}
 
-				mainWindow.webContents.send(
-					'UNINSTALL_MESSAGE',
-					uninstallMessage,
-				);
-
-				// getPackages(mainWindow);
-			},
+		mainWindow.webContents.send(
+			'UNINSTALL_MESSAGE',
+			uninstallMessage,
 		);
 	}
 
-	// Validate pip after the data is received from exec
-	_validatePIPAfterExec(pipName, pipPath, stdout, error) {
+	async validatePIP(pipName, pipPath) {
+
+		const { output, error } = await execCommand(`${pipPath} --version ${this.PIP_FLAGS}`);
+
 		let pipNameValid = true;
 		let pipNameError = '';
 
@@ -331,7 +313,7 @@ class PipHandler {
 			// ...We check whether a string is a version string or not
 			// by using `parseFloat`
 
-			let pipVersionOutputArray = stdout.split(' ');
+			let pipVersionOutputArray = output?.split(' ');
 
 			let firstWord = pipVersionOutputArray[0].toLowerCase();
 			let secondWord = parseFloat(pipVersionOutputArray[1]);
@@ -370,58 +352,29 @@ class PipHandler {
 			pipPathError = 'PIP path cannot be empty';
 		}
 
-		return { pipNameValid, pipPathValid, pipNameError, pipPathError };
+		const pipValid = pipNameValid && pipPathValid;
+
+		return { pipNameValid, pipPathValid, pipNameError, pipPathError, pipValid };
 	}
 
-	// Validate PIP and and provide callbacks to run after exec and after PIP is found to be valid
-	validatePIPWithCallBack(
-		pipName,
-		pipPath,
-		onPIPValid,
-		onExecComplete = () => {},
-	) {
-		exec(
-			`${pipPath} --version ${this.PIP_FLAGS}`,
-			(error, stdout, stderr) => {
-				const validationData = this._validatePIPAfterExec(
-					pipName,
-					pipPath,
-					stdout,
-					error,
-				);
-
-				if (
-					validationData.pipNameValid &&
-					validationData.pipPathValid
-				) {
-					onPIPValid(validationData);
-				}
-
-				onExecComplete(validationData);
-			},
-		);
-	}
 
 	// Validate the PIP name and path and then add it to `electron-store`
-	validateAndAddPIP(mainWindow, pipName, pipPath) {
-		this.validatePIPWithCallBack(
-			pipName,
-			pipPath,
-			// Runs if pip is valid
-			() => {
-				this.addPIPToAllPIPS(pipName, pipPath);
-				this.setCurrentPIP(pipName, pipPath);
+	async validateAndAddPIP(mainWindow, pipName, pipPath) {
 
-				this.sendCurrentPIPAndAllPIPS(mainWindow);
-			},
-			({ pipNameValid, pipPathValid, pipNameError, pipPathError }) => {
-				mainWindow.webContents.send(
-					'PIP_ADDITION_RESULTS',
-					pipNameValid && pipPathValid,
-					pipNameError,
-					pipPathError,
-				);
-			},
+		const { pipValid, pipNameError, pipPathError } = await this.validatePIP(pipName, pipPath);
+
+		if (pipValid) {
+			this.addPIPToAllPIPS(pipName, pipPath);
+			this.setCurrentPIP(pipName, pipPath);
+
+			this.sendCurrentPIPAndAllPIPS(mainWindow);
+		}
+
+		mainWindow.webContents.send(
+			'PIP_ADDITION_RESULTS',
+			pipValid,
+			pipNameError,
+			pipPathError,
 		);
 	}
 
@@ -476,60 +429,55 @@ class PipHandler {
 			.catch(err => console.log(err));
 	}
 
-	installPackage(mainWindow, packagesData) {
-		let installCommand = '';
-
-		Object.entries(packagesData).forEach(
-			([packageName, packageVersion]) =>
-				(installCommand += ` ${packageName}==${packageVersion}`),
-		);
-
+	async installPackage(mainWindow, packagesData) {
 		const PIP = this.getCurrentPIPPath();
-		installCommand = PIP + ' install' + installCommand;
 
-		exec(`${installCommand} ${this.PIP_FLAGS}`, (error, stdout, stderr) => {
-			mainWindow.webContents.send('INSTALL_OUTPUT', stdout);
+		let packageDataForInstallCommand = '';
 
-			let packageInstallStatus = {};
+		for (const [packageName, packageVersion] of Object.entries(packagesData)) {
+			packageDataForInstallCommand += ` ${packageName}==${packageVersion}`
+		}
 
-			Object.entries(packagesData).forEach(
-				([packageName, packageVersion]) => {
-					exec(
-						`${PIP} show ${packageName} ${this.PIP_FLAGS}`,
-						(_error, _stdout, _stderr) => {
-							let message = '';
-							let error = false;
+		const installCommand = PIP + ' install' + packageDataForInstallCommand;
 
-							if (
-								stderr.includes('Package(s) not found:') ||
-								_error
-							) {
-								message = `Error installing ${packageName}`;
-								error = true;
-							} else {
-								message = `${packageName} ${packageVersion} was successfully installed.`;
-							}
+		// Run install command
+		const { output, stderr } = await execCommand(`${installCommand} ${this.PIP_FLAGS}`);
 
-							packageInstallStatus[packageName] = {
-								packageVersion,
-								message,
-								error,
-							};
+		// Send install output to frontend
+		mainWindow.webContents.send('INSTALL_OUTPUT', output ?? stderr);
 
-							if (
-								Object.keys(packageInstallStatus).length ===
-								Object.keys(packagesData).length
-							) {
-								mainWindow.webContents.send(
-									'PACKAGE_STATUS_AFTER_INSTALL',
-									packageInstallStatus,
-								);
-							}
-						},
-					);
-				},
-			);
-		});
+		let packageInstallStatus = {};
+
+		for (const [packageName, packageVersion] of Object.entries(packagesData)) {
+
+			let { error: packageShowCommandError, stderr: packageShowCommandStderr } = await execCommand(`${PIP} show ${packageName} ${this.PIP_FLAGS}`);
+
+			let pkgInstallErr = false;
+			let message = `${packageName} ${packageVersion} was successfully installed.`;
+
+			if (
+				packageShowCommandError ||
+				packageShowCommandStderr?.includes('Package(s) not found:')
+
+			) {
+				message = `Error installing ${packageName}`;
+				pkgInstallErr = true;
+			}
+
+			packageInstallStatus[packageName] = {
+				packageVersion, message, error: pkgInstallErr,
+			};
+
+			if (
+				Object.keys(packageInstallStatus).length ===
+				Object.keys(packagesData).length
+			) {
+				mainWindow.webContents.send(
+					'PACKAGE_STATUS_AFTER_INSTALL',
+					packageInstallStatus,
+				);
+			}
+		}
 	}
 
 	async getPackageDataFromPyPI(mainWindow, packageName, defaultValue = -1) {
@@ -538,7 +486,7 @@ class PipHandler {
 		let packageData = appCache.get(cacheKeyName);
 
 		// Handling miss
-		if (packageData == undefined) {
+		if (typeof packageData === "undefined") {
 			try {
 				const res = await axios.get(
 					`https://pypi.org/pypi/${packageName}/json`,
