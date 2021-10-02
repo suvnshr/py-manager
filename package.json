@@ -1,7 +1,7 @@
 {
   "name": "py-manager",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1",
   "private": true,
   "author": {
     "name": "Suvansh Rana",
@@ -85,11 +85,37 @@
       "buildResources": "assets"
     },
     "productName": "Py Manager",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "suvansh-rana",
+        "repo": "py_manager",
+        "private": true
+      }
+    ],
     "linux": {
-      "target": "deb"
+      "publish": [
+        "github"
+      ],
+      "target": [
+        {
+          "target": "deb"
+        }
+      ]
     },
     "win": {
-      "target": "nsis"
+      "publish": [
+        "github"
+      ],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
     }
   },
   "homepage": "./"
