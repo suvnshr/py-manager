@@ -1,4 +1,4 @@
-# py_manager
+# py-manager
 A package manager for python
 
 ## Setup
