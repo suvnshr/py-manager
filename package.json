@@ -1,7 +1,7 @@
 {
   "name": "py-manager",
   "license": "MIT",
-  "version": "0.1",
+  "version": "0.1.0",
   "private": true,
   "author": {
     "name": "Suvansh Rana",
@@ -45,7 +45,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron-react-start": "concurrently \"cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .  \"",
-    "electron:build": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js"
+    "electron:build": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js",
+    "electron:publish": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js --publish onTag"
   },
   "eslintConfig": {
     "extends": [
