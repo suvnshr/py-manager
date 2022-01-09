@@ -180,7 +180,6 @@ function Home() {
 				<InstallPackagesStatus
 					currentPIP={currentPIP}
 					isOpen={openInstallStatusModal}
-					currentPIP={currentPIP}
 					handleClose={handleInstallStatusClose}
 				/>
 			) : null}

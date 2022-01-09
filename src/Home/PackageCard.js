@@ -6,7 +6,6 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { Grid, LinearProgress } from '@material-ui/core';
-import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import routes from '../commons/routes';
 
