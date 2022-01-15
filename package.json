@@ -53,7 +53,8 @@
     "electron:linux": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js -l",
     "electron:win": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js -w",
     "electron:publish": "electron-builder -c.extraMetadata.main=build/electron.js -p always",
-    "build:only-electron": "electron-builder -c.extraMetadata.main=build/electron.js -w"
+    "build:only-electron-win": "electron-builder -c.extraMetadata.main=build/electron.js -w",
+    "build:only-electron-linux": "electron-builder -c.extraMetadata.main=build/electron.js -l"
   },
   "eslintConfig": {
     "extends": [
@@ -128,7 +129,8 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true
     }
   },
   "homepage": "./"
