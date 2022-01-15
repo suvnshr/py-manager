@@ -10,11 +10,11 @@ import {
 	Grid,
 	List,
 	Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 
 import { SlideDialogTransition } from '../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
-import { GetApp } from '@material-ui/icons';
+import { GetApp } from '@mui/icons-material';
 import customTheme from '../commons/theme';
 import LazyLoadWrapper from '../commons/LazyLoadWrapper';
 
@@ -67,14 +67,12 @@ export default function InstallConfirmDialog({
 	}, [packagesToInstall]);
 
 	return (
-		<Dialog
-			open={open}
-			disableBackdropClick
-			fullWidth
-			TransitionComponent={SlideDialogTransition}
-			maxWidth={'sm'}
-			onClose={handleConfirmInstallClose}
-		>
+        <Dialog
+            open={open}
+            fullWidth
+            TransitionComponent={SlideDialogTransition}
+            maxWidth={'sm'}
+            onClose={handleConfirmInstallClose}>
 			<DialogTitle>
 				<div>Choose version</div>
 				<Typography
@@ -87,7 +85,7 @@ export default function InstallConfirmDialog({
 			<DialogContent>
 				<List>
 					{packagesToInstall.length === 0 ? (
-						<Grid container justify="center">
+						<Grid container justifyContent="center">
 							<CircularProgress />
 						</Grid>
 					) : (
@@ -122,5 +120,5 @@ export default function InstallConfirmDialog({
 				</Button>
 			</DialogActions>
 		</Dialog>
-	);
+    );
 }

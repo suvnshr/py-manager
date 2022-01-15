@@ -1,5 +1,5 @@
 import React from 'react';
-import Slide from '@material-ui/core/Slide';
+import Slide from '@mui/material/Slide';
 
 const Margin = (count = 1) => <div style={{ margin: `${count * 16} 0` }} />;
 

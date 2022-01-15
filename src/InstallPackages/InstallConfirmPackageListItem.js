@@ -13,8 +13,8 @@ import {
 	Select,
 	MenuItem,
 	CircularProgress,
-} from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+} from '@mui/material';
+import { Delete } from '@mui/icons-material';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -61,7 +61,7 @@ export default function InstallConfirmPackageListItem({
 	const loader = <CircularProgress size={25} />;
 
 	return (
-		<ListItem divider>
+        <ListItem divider>
 			<ListItemIcon
 				onClick={
 					!loading
@@ -69,7 +69,7 @@ export default function InstallConfirmPackageListItem({
 						: null
 				}
 			>
-				<IconButton edge="start">
+				<IconButton edge="start" size="large">
 					{loading ? loader : <Delete />}
 				</IconButton>
 			</ListItemIcon>
@@ -102,5 +102,5 @@ export default function InstallConfirmPackageListItem({
 				)}
 			</ListItemSecondaryAction>
 		</ListItem>
-	);
+    );
 }

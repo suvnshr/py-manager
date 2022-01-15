@@ -1,20 +1,12 @@
-import {
-	Chip,
-	Grid,
-	List,
-	ListItem,
-	ListItemIcon,
-	ListItemText,
-	makeStyles,
-	Typography,
-} from '@material-ui/core';
+import { Chip, Grid, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import {
 	LanguageRounded,
 	MenuBookRounded,
 	StorageRounded,
 	SupervisedUserCircleRounded,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import routes from '../commons/routes';
 

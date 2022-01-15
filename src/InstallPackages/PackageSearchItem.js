@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItem from '@mui/material/ListItem';
 import {
 	Checkbox,
 	ListItemSecondaryAction,
 	ListItemIcon,
 	IconButton,
 	FormControl,
-} from '@material-ui/core';
-import { InfoOutlined, OpenInNewOutlined } from '@material-ui/icons';
+} from '@mui/material';
+import { InfoOutlined, OpenInNewOutlined } from '@mui/icons-material';
 
 import { isPackageInstalled } from '../commons/helpers';
 import routes from '../commons/routes';
@@ -75,7 +75,7 @@ export default function PackageSearchItem({
 	useEffect(syncInstalledPackagesWithSelection, [packagesToInstall]);
 
 	return (
-		<ListItem disableRipple divider={true} button>
+        <ListItem disableRipple divider={true} button>
 			<ListItemIcon>
 				<FormControl>
 					{_isPackageInstalled ? (
@@ -106,13 +106,13 @@ export default function PackageSearchItem({
 
 			<ListItemSecondaryAction>
 				<IconButton
-					edge="end"
-					onClick={
+                    edge="end"
+                    onClick={
 						_isPackageInstalled
 							? goToDetailPage
 							: goToPyPIDetailPage
 					}
-				>
+                    size="large">
 					{_isPackageInstalled ? (
 						<InfoOutlined fontSize="small" />
 					) : (
@@ -121,5 +121,5 @@ export default function PackageSearchItem({
 				</IconButton>
 			</ListItemSecondaryAction>
 		</ListItem>
-	);
+    );
 }

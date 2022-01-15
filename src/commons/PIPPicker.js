@@ -1,5 +1,6 @@
-import { Button, makeStyles } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Button } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowDropDown } from '@mui/icons-material';
 import React from 'react';
 import { FaPython } from 'react-icons/fa';
 

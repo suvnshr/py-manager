@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { FolderOpenOutlined } from '@material-ui/icons';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import { FolderOpenOutlined } from '@mui/icons-material';
 
 import {
 	Grid,
@@ -18,7 +18,7 @@ import {
 	Input,
 	FormHelperText,
 	Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { isNotEmpty, SlideDialogTransition } from '../commons/helpers';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -100,15 +100,13 @@ export default function PIPAdditionModal({ open, handleClose }) {
 	}, []);
 
 	return (
-		<Dialog
-			style={{ zIndex: 1500 }}
-			keepMounted={true}
-			disableBackdropClick={true}
-			open={open}
-			fullWidth={true}
-			onClose={handleClose}
-			TransitionComponent={SlideDialogTransition}
-		>
+        <Dialog
+            style={{ zIndex: 1500 }}
+            keepMounted={true}
+            open={open}
+            fullWidth={true}
+            onClose={handleClose}
+            TransitionComponent={SlideDialogTransition}>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<DialogTitle>
 					Add a PIP path
@@ -148,7 +146,7 @@ export default function PIPAdditionModal({ open, handleClose }) {
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="end">
-									<IconButton onClick={pickPIP} edge="end">
+									<IconButton onClick={pickPIP} edge="end" size="large">
 										<FolderOpenOutlined />
 									</IconButton>
 								</InputAdornment>
@@ -172,5 +170,5 @@ export default function PIPAdditionModal({ open, handleClose }) {
 				</DialogActions>
 			</form>
 		</Dialog>
-	);
+    );
 }

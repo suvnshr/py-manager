@@ -16,14 +16,14 @@ import {
 	ListItemIcon,
 	ListItemText,
 	IconButton,
-} from '@material-ui/core';
+} from '@mui/material';
 import { PIPContext } from '../context/PIPContext';
 import {
 	AddCircleOutline,
 	Delete,
 	DeleteOutlined,
 	StorageOutlined,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import PIPAdditionModal from './PIPAdditionModal';
 import { FaPython } from 'react-icons/fa';
 import { SlideDialogTransition } from '../commons/helpers';
@@ -68,7 +68,7 @@ const PIPSelectModal = ({
 	};
 
 	const changePIPLoader = (
-		<Grid container direction="column" justify="center" alignItems="center">
+		<Grid container direction="column" justifyContent="center" alignItems="center">
 			<Grid item>
 				<Typography variant="body1" color="textSecondary">
 					Changing PIP...
@@ -80,7 +80,7 @@ const PIPSelectModal = ({
 	);
 
 	return (
-		<Dialog
+        <Dialog
 			open={open}
 			onClose={handleClose}
 			fullWidth
@@ -88,7 +88,7 @@ const PIPSelectModal = ({
 			TransitionComponent={SlideDialogTransition}
 		>
 			<DialogTitle>
-				<Grid container justify="space-between">
+				<Grid container justifyContent="space-between">
 					<Grid item>
 						<Typography variant="h5" component="div">
 							Select Virtual Environment
@@ -229,7 +229,7 @@ const PIPSelectModal = ({
 				</Button>
 			</DialogActions>
 		</Dialog>
-	);
+    );
 };
 
 export default PIPSelectModal;

@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useContext } from 'react';
 
 import {
-	AppBar,
-	Avatar,
-	Box,
-	Button,
-	CircularProgress,
-	Dialog,
-	Grid,
-	IconButton,
-	List,
-	ListItem,
-	ListItemAvatar,
-	ListItemText,
-	makeStyles,
-	Toolbar,
-	Typography,
-	Chip,
-	ListItemSecondaryAction,
-} from '@material-ui/core';
-import { green, red } from '@material-ui/core/colors';
-import { Cancel, CheckOutlined, GetApp } from '@material-ui/icons';
+    AppBar,
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    Grid,
+    IconButton,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Toolbar,
+    Typography,
+    Chip,
+    ListItemSecondaryAction,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { green, red } from '@mui/material/colors';
+import { Cancel, CheckOutlined, GetApp } from '@mui/icons-material';
 
 import { SlideDialogTransition } from '../commons/helpers';
 import { useHistory } from 'react-router-dom';
@@ -103,21 +103,15 @@ export default function InstallPackagesStatus({
 	};
 
 	return (
-		<div>
+        <div>
 			<Dialog
-				fullScreen
-				open={isOpen}
-				onClose={handleClose}
-				disableBackdropClick={true}
-				TransitionComponent={SlideDialogTransition}
-			>
+                fullScreen
+                open={isOpen}
+                onClose={handleClose}
+                TransitionComponent={SlideDialogTransition}>
 				<AppBar className={classes.appBar}>
 					<Toolbar>
-						<IconButton
-							edge="start"
-							color="inherit"
-							aria-label="close"
-						>
+						<IconButton edge="start" color="inherit" aria-label="close" size="large">
 							<GetApp />
 						</IconButton>
 						<Typography variant="h6" className={classes.title}>
@@ -239,5 +233,5 @@ export default function InstallPackagesStatus({
 				)}
 			</Dialog>
 		</div>
-	);
+    );
 }

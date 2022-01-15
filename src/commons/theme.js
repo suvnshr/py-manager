@@ -1,23 +1,21 @@
-import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles';
+import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 
-let theme = createMuiTheme({
-	palette: {
-		primary: {
-			// 306998
-			// #4B8BBE
-			// main: '#6ba6d6',
-			main: '#4B8BBE',
+export default responsiveFontSizes(
+	createTheme({
+		palette: {
+			primary: {
+				// 306998
+				// #4B8BBE
+				// main: '#6ba6d6',
+				main: '#4B8BBE',
+			},
+			secondary: {
+				main: '#FFD43B',
+			},
+			mode: 'dark',
 		},
-		secondary: {
-			main: '#FFD43B',
+		typography: {
+			fontFamily: "'Source Sans Pro', Arial, sans-serif",
 		},
-		type: 'dark',
-	},
-	typography: {
-		fontFamily: "'Source Sans Pro', Arial, sans-serif",
-	},
-});
-
-let customTheme = responsiveFontSizes(theme);
-
-export default customTheme;
+	}),
+);

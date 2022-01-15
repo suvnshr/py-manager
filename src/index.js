@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
-import { CssBaseline, ThemeProvider } from '@material-ui/core';
+import { CssBaseline, ThemeProvider, StyledEngineProvider } from '@mui/material';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 
 import './commons/index.css';
@@ -15,21 +15,23 @@ import HomeOrOnboarding from './Home/HomeOrOnboarding';
 
 ReactDOM.render(
 	<React.StrictMode>
-		<ThemeProvider theme={customTheme}>
-			<PIPContentProvider>
-				<CssBaseline />
-				<Router>
-					<Switch>
-						<Route exact path={routes.HOME}>
-							<HomeOrOnboarding />
-						</Route>
-						<Route path={routes.PACKAGE_DETAIL_WITH_PARAM}>
-							<PackageDetail />
-						</Route>
-					</Switch>
-				</Router>
-			</PIPContentProvider>
-		</ThemeProvider>
+		<StyledEngineProvider injectFirst>
+            <ThemeProvider theme={customTheme}>
+                <PIPContentProvider>
+                    <CssBaseline />
+                    <Router>
+                        <Switch>
+                            <Route exact path={routes.HOME}>
+                                <HomeOrOnboarding />
+                            </Route>
+                            <Route path={routes.PACKAGE_DETAIL_WITH_PARAM}>
+                                <PackageDetail />
+                            </Route>
+                        </Switch>
+                    </Router>
+                </PIPContentProvider>
+            </ThemeProvider>
+        </StyledEngineProvider>
 	</React.StrictMode>,
 	document.getElementById('root'),
 );

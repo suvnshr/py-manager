@@ -8,7 +8,7 @@ import {
 	DialogTitle,
 	Grid,
 	LinearProgress,
-} from '@material-ui/core';
+} from '@mui/material';
 import { PIPContext } from '../context/PIPContext';
 import Root from '../commons/Root';
 import Home from './Home';

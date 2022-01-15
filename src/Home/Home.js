@@ -9,8 +9,8 @@ import {
 	Grid,
 	InputAdornment,
 	TextField,
-} from '@material-ui/core';
-import { GetApp, SearchOutlined } from '@material-ui/icons';
+} from '@mui/material';
+import { GetApp, SearchOutlined } from '@mui/icons-material';
 
 import InstallPackagesStatus from '../InstallPackages/InstallingPackageStatus';
 import InstallPackagesDialog from '../InstallPackages/InstallPackagesDialog';
@@ -97,7 +97,7 @@ function Home() {
 	};
 
 	return (
-		<div>
+        <div>
 			<p />
 
 			<Grid container>
@@ -105,7 +105,7 @@ function Home() {
 				<Grid item xs={12} sm={6} md={6} lg={4}>
 					<div>
 						<p />
-						<Grid container justify="center">
+						<Grid container justifyContent="center">
 							<TextField
 								fullWidth={true}
 								onKeyUp={performSearch}
@@ -132,7 +132,7 @@ function Home() {
 			<p />
 
 			<Container>
-				<Grid container justify="space-between" style={{ padding: 20 }}>
+				<Grid container justifyContent="space-between" style={{ padding: 20 }}>
 					<Grid item>
 						{packages !== null ? (
 							<Chip
@@ -157,7 +157,7 @@ function Home() {
 					</Grid>
 				</Grid>
 
-				<Grid container justify="center">
+				<Grid container justifyContent="center">
 					{packages === null
 						? loader
 						: packages.length === 0
@@ -184,7 +184,7 @@ function Home() {
 				/>
 			) : null}
 		</div>
-	);
+    );
 }
 
 export default Home;

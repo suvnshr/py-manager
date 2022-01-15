@@ -1,13 +1,7 @@
 import React, { useEffect } from 'react';
-import {
-	Typography,
-	makeStyles,
-	AppBar,
-	Toolbar,
-	IconButton,
-	Button,
-} from '@material-ui/core';
-import { ArrowBackOutlined } from '@material-ui/icons';
+import { Typography, AppBar, Toolbar, IconButton, Button } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowBackOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import routes from '../commons/routes';
 import theme from '../commons/theme';
@@ -71,15 +65,15 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 	};
 
 	return (
-		<header className={classes.root}>
+        <header className={classes.root}>
 			<AppBar position="static">
 				<Toolbar>
 					<IconButton
-						edge="start"
-						className={classes.menuButton}
-						color="inherit"
-						onClick={goBack}
-					>
+                        edge="start"
+                        className={classes.menuButton}
+                        color="inherit"
+                        onClick={goBack}
+                        size="large">
 						<ArrowBackOutlined />
 					</IconButton>
 					<Typography className={classes.title} variant="h5" noWrap>
@@ -113,7 +107,7 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 				</Toolbar>
 			</AppBar>
 		</header>
-	);
+    );
 }
 
 export default PackageDetailHeader;
