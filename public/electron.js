@@ -13,7 +13,6 @@ function createWindow() {
 		webPreferences: {
 			nodeIntegration: true,
 			webSecurity: false,
-		
 		},
 	});
 
@@ -23,7 +22,7 @@ function createWindow() {
 	mainWindow.loadURL(
 		isDev
 			? 'http://localhost:3000'
-			: `file://${path.join(__dirname, '../build/index.html')}`,
+			: `file://${path.join(__dirname, './index.html')}`,
 	);
 
 	// Install the extension if developer mode is ON
@@ -105,25 +104,29 @@ ipcMain.handle('CHANGE_CURRENT_PIP', function (ev, pipName) {
 	pipPackagesHandler.changeCurrentPIP(mainWindow, pipName);
 });
 
-
 ipcMain.handle('DELETE_PIP', function (ev, pipName) {
 	pipPackagesHandler.deletePIP(mainWindow, pipName);
 });
 
-
-ipcMain.handle("GET_HAS_ON_BOARDED", function () {
+ipcMain.handle('GET_HAS_ON_BOARDED', function () {
 	pipPackagesHandler.sendHasOnBoarded(mainWindow);
-})
-
-
-ipcMain.handle("START_ON_BOARDING", function () {
-	pipPackagesHandler.startOnBoarding(mainWindow);
-})
-
-ipcMain.handle("GET_PYPI_PACKAGE_DATA", function (ev, packageName, defaultValue=-1) {
-	pipPackagesHandler.getPackageDataFromPyPI(mainWindow, packageName, defaultValue);
 });
 
-ipcMain.handle("GET_IS_DEFAULT_PIP_WORKING", function () {
+ipcMain.handle('START_ON_BOARDING', function () {
+	pipPackagesHandler.startOnBoarding(mainWindow);
+});
+
+ipcMain.handle(
+	'GET_PYPI_PACKAGE_DATA',
+	function (ev, packageName, defaultValue = -1) {
+		pipPackagesHandler.getPackageDataFromPyPI(
+			mainWindow,
+			packageName,
+			defaultValue,
+		);
+	},
+);
+
+ipcMain.handle('GET_IS_DEFAULT_PIP_WORKING', function () {
 	pipPackagesHandler.isDefaultPIPWorkingAfterOnboarding(mainWindow);
-})
+});
