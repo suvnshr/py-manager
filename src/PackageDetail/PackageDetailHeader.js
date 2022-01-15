@@ -80,7 +80,7 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 						About <b>{packageName}</b>
 					</Typography>
 
-					{updatable ? (
+					{/* {updatable ? (
 						<Button
 							variant="contained"
 							color="secondary"
@@ -88,7 +88,7 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 						>
 							Update
 						</Button>
-					) : null}
+					) : null} */}
 
 					<Button
 						variant="contained"
