@@ -50,7 +50,7 @@
     "electron:linux": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js -l",
     "electron:win": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js -w",
     "electron:publish": "electron-builder -c.extraMetadata.main=build/electron.js -p always",
-    "build:only-electron": "electron-builder -c.extraMetadata.main=build/electron.js -l"
+    "build:only-electron": "electron-builder -c.extraMetadata.main=build/electron.js -w"
   },
   "eslintConfig": {
     "extends": [
@@ -80,7 +80,7 @@
   "build": {
     "asar": true,
     "extends": null,
-    "appId": "com.suvansh-rana.${name}",
+    "appId": "com.suvansh-rana.pymanager",
     "files": [
       "build/**/*",
       "package.json",
@@ -122,6 +122,10 @@
         "libxtst6",
         "libnss3"
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "homepage": "./"
