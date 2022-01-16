@@ -1,5 +1,5 @@
 # py-manager
-A package manager for python
+A simple GUI based package manager for python
 
 ## Setup
 
