@@ -1,4 +1,4 @@
-# py-manager
+# Py Manager
 A simple GUI based package manager for python
 
 ## Setup
