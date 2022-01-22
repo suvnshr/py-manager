@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { SearchOutlined, Close, Search, FilterList } from '@material-ui/icons';
+import { SearchOutlined, Close, Search } from '@mui/icons-material';
 
 import {
-	CircularProgress,
-	Container,
-	Divider,
-	Grid,
-	InputAdornment,
-	TextField,
-	List,
-	Dialog,
-	Button,
-	makeStyles,
-	AppBar,
-	Toolbar,
-	IconButton,
-	Typography,
-	MenuItem,
-	FormControl,
-	InputLabel,
-	Select,
-	Chip,
-} from '@material-ui/core';
+    CircularProgress,
+    Container,
+    Divider,
+    Grid,
+    InputAdornment,
+    TextField,
+    List,
+    Dialog,
+    Button,
+    AppBar,
+    Toolbar,
+    IconButton,
+    Typography,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Select,
+    Chip,
+} from '@mui/material';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import { isNotEmpty, SlideDialogTransition } from '../../commons/helpers';
+import { isNotEmpty, SlideDialogTransition } from '../commons/helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import PackageSearchItem from './PackageSearchItem';
 import InstallConfirmDialog from './InstallConfirmDialog';
@@ -75,7 +76,6 @@ export default function InstallPackagesDialog({
 	useEffect(() => {
 		ipcRenderer.on('SEARCH_DATA', function (ev, matchedPackages) {
 			setSearchedPackages(matchedPackages);
-			console.log(matchedPackages);
 			setPackageLoading(false);
 		});
 	}, []);
@@ -121,10 +121,10 @@ export default function InstallPackagesDialog({
 	const renderSearchResults = () => {
 		if (packageLoading) {
 			return (
-				<Grid container justify="center" style={{ height: '80vh' }}>
+                <Grid container justifyContent="center" style={{ height: '80vh' }}>
 					<CircularProgress />
 				</Grid>
-			);
+            );
 		} else if (searchedPackages !== null) {
 			if (searchedPackages === -1) {
 				return (
@@ -156,14 +156,14 @@ export default function InstallPackagesDialog({
 			);
 
 			return (
-				<div>
+                <div>
 					<p />
 					<Divider />
 					<p />
 
-					<Grid container justify="space-between" alignItems="center">
+					<Grid container justifyContent="space-between" alignItems="center">
 						<Grid item>
-							<FormControl>
+							<FormControl variant="standard">
 								<InputLabel>Order By</InputLabel>
 								<Select
 									value={filter}
@@ -194,27 +194,25 @@ export default function InstallPackagesDialog({
 					{/* Search results */}
 					<List>{listItems}</List>
 				</div>
-			);
+            );
 		}
 	};
 
 	return (
-		<div>
+        <div>
 			<Dialog
-				fullScreen
-				open={isOpen}
-				onClose={handleClose}
-				TransitionComponent={SlideDialogTransition}
-				disableBackdropClick={true}
-			>
+                fullScreen
+                open={isOpen}
+                onClose={handleClose}
+                TransitionComponent={SlideDialogTransition}>
 				<AppBar className={classes.appBar}>
 					<Toolbar>
 						<IconButton
-							edge="start"
-							color="inherit"
-							onClick={handleClose}
-							aria-label="close"
-						>
+                            edge="start"
+                            color="inherit"
+                            onClick={handleClose}
+                            aria-label="close"
+                            size="large">
 							<Close />
 						</IconButton>
 						<Typography variant="h6" className={classes.title}>
@@ -238,9 +236,8 @@ export default function InstallPackagesDialog({
 
 				<p />
 				<Container>
-					<Grid container>
-						<Grid item lg={3} xl={4} />
-						<Grid item xs={12} lg={6} xl={4}>
+					<Grid container justifyContent={"center"}>
+						<Grid item xs={12} lg={8} xl={6}>
 							<form
 								onSubmit={handleSubmit(formSubmit)}
 								method="POST"
@@ -266,7 +263,7 @@ export default function InstallPackagesDialog({
 								/>
 
 								<p />
-								<Grid container justify="flex-end">
+								<Grid container justifyContent="flex-end">
 									<Button
 										type="submit"
 										variant="contained"
@@ -292,9 +289,10 @@ export default function InstallPackagesDialog({
 						handleConfirmInstallClose,
 						handlePackageModalClose: handleClose,
 						setOpenInstallStatusModal,
+						setSearchedPackages,
 					}}
 				/>
 			</Dialog>
 		</div>
-	);
+    );
 }

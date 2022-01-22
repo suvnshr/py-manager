@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
-import { Grid, LinearProgress } from '@material-ui/core';
-import axios from 'axios';
+import makeStyles from '@mui/styles/makeStyles';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import { Divider, Grid, LinearProgress } from '@mui/material';
 import { useHistory } from 'react-router-dom';
-import routes from '../../commons/routes';
+import routes from '../commons/routes';
+
+const { ipcRenderer } = window.require('electron');
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -16,6 +17,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	card: {
 		borderRadius: 12,
+		borderBottomRightRadius: 40,
 		// 	minWidth: 275,
 		// 	backgroundImage: `linear-gradient(135deg,
 		// 		${theme.palette.secondary.main},
@@ -33,8 +35,8 @@ const useStyles = makeStyles(theme => ({
 	title: {
 		fontSize: 14,
 	},
-	pos: {
-		marginBottom: 12,
+	packageVersion: {
+		marginBottom: 16,
 	},
 	actions: {
 		justifyContent: 'flex-end',
@@ -51,18 +53,16 @@ export default function PackageCard({
 	const [packageData, setPackageData] = useState(null);
 
 	useEffect(() => {
-		axios
-			.get(`https://pypi.org/pypi/${packageName}/json`, {})
-			.then(res => {
-				setPackageData(res.data);
-			})
-			.catch(err => {
-				setPackageData(-1);
-			});
+		ipcRenderer.invoke('GET_PYPI_PACKAGE_DATA', packageName);
+
+		ipcRenderer.once(
+			'PYPI_PACKAGE_DATA_OF_' + packageName,
+			(ev, _packageData) => setPackageData(_packageData),
+		);
 	}, []);
 
 	const loader = (
-		<Grid container justify="center">
+		<Grid container justifyContent="center">
 			<Grid item xs={12}>
 				<LinearProgress color="secondary" />
 			</Grid>
@@ -70,9 +70,7 @@ export default function PackageCard({
 	);
 
 	const goToDetailPage = ev => {
-		history.push(
-			routes.PACKAGE_DETAIL + packageName
-		);
+		history.push(routes.PACKAGE_DETAIL + packageName);
 	};
 
 	return (
@@ -87,9 +85,13 @@ export default function PackageCard({
 					<Typography variant="h5" component="h2">
 						{packageName}
 					</Typography>
-					<Typography className={classes.pos} color="textSecondary">
+					<Typography
+						className={classes.packageVersion}
+						color="textSecondary"
+					>
 						{packageVersion}
 					</Typography>
+					<Divider sx={{ mb: 2 }} />
 					<Typography
 						variant="body2"
 						component="div"
@@ -110,6 +112,9 @@ export default function PackageCard({
 						size="large"
 						color="secondary"
 						onClick={goToDetailPage}
+						sx={{
+							borderBottomRightRadius: 40,
+						}}
 					>
 						More
 					</Button>

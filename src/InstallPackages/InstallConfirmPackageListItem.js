@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import axios from 'axios';
-
 import {
 	ListItem,
 	ListItemIcon,
@@ -13,8 +11,11 @@ import {
 	Select,
 	MenuItem,
 	CircularProgress,
-} from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+} from '@mui/material';
+import { Delete } from '@mui/icons-material';
+
+const { ipcRenderer } = window.require('electron');
+
 
 export default function InstallConfirmPackageListItem({
 	packageName,
@@ -23,7 +24,7 @@ export default function InstallConfirmPackageListItem({
 	setFinalPackages,
 }) {
 	const [currentVersion, setCurrentVersion] = useState(null);
-	const [packageData, setPackageData] = useState([]);
+	const [packageData, setPackageData] = useState({});
 
 	const [loading, setLoading] = useState(true);
 
@@ -32,19 +33,18 @@ export default function InstallConfirmPackageListItem({
 	};
 
 	useEffect(() => {
-		const fetchPackageData = async () => {
-			await axios
-				.get(`https://pypi.org/pypi/${packageName}/json`)
-				.then(res => {
-					const latestVersion = res.data.info.version;
+		ipcRenderer.invoke('GET_PYPI_PACKAGE_DATA', packageName);
 
-					setPackageData(res.data);
-					setCurrentVersion(latestVersion);
-					setLoading(false);
-				});
-		};
+		ipcRenderer.on(
+			'PYPI_PACKAGE_DATA_OF_' + packageName,
+			(ev, _packageData) => {
+				const latestVersion = _packageData.info.version;
 
-		fetchPackageData();
+				setPackageData(_packageData);
+				setCurrentVersion(latestVersion);
+				setLoading(false);
+			},
+		);
 	}, []);
 
 	useEffect(() => {
@@ -59,7 +59,7 @@ export default function InstallConfirmPackageListItem({
 	const loader = <CircularProgress size={25} />;
 
 	return (
-		<ListItem divider>
+        <ListItem divider>
 			<ListItemIcon
 				onClick={
 					!loading
@@ -67,7 +67,7 @@ export default function InstallConfirmPackageListItem({
 						: null
 				}
 			>
-				<IconButton edge="start">
+				<IconButton edge="start" size="large">
 					{loading ? loader : <Delete />}
 				</IconButton>
 			</ListItemIcon>
@@ -78,10 +78,11 @@ export default function InstallConfirmPackageListItem({
 				{loading ? (
 					loader
 				) : (
-					<FormControl>
+					<FormControl variant="standard">
 						<InputLabel>Version</InputLabel>
 
 						<Select
+							
 							value={currentVersion}
 							onChange={handleVersionChange}
 						>
@@ -100,5 +101,5 @@ export default function InstallConfirmPackageListItem({
 				)}
 			</ListItemSecondaryAction>
 		</ListItem>
-	);
+    );
 }

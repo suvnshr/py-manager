@@ -1,26 +1,13 @@
-import { CircularProgress, Grid } from '@material-ui/core';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-// import eventNames from '../commons/eventNames';
 import compareVersions from 'compare-versions';
-import {
-	LanguageRounded,
-	MenuBookRounded,
-	StorageRounded,
-	SupervisedUserCircleRounded,
-} from '@material-ui/icons';
+
 import PackageDetailBody from './PackageDetailBody';
 import PackageDetailHeader from './PackageDetailHeader';
 
-const { ipcRenderer } = window.require('electron');
+import FullScreenLoader from '../commons/FullScreenLoader';
 
-const packageProperties = {
-	'author': <SupervisedUserCircleRounded />,
-	'home-page': <LanguageRounded />,
-	'license': <MenuBookRounded />,
-	'location': <StorageRounded />,
-};
+const { ipcRenderer } = window.require('electron');
 
 function PackageDetail() {
 	const { packageName } = useParams();
@@ -30,20 +17,19 @@ function PackageDetail() {
 	const [updatable, setUpdatable] = useState(false);
 
 	useEffect(() => {
-		ipcRenderer.invoke('RECEIVE_LOCAL_DETAIL', packageName);
 
-		axios
-			.get(`https://pypi.org/pypi/${packageName}/json`)
-			.then(res => {
-				setPackageData(res.data);
-			})
-			.catch(err => {
-				setPackageData(-1);
-			});
+		ipcRenderer.invoke('RECEIVE_LOCAL_DETAIL', packageName);
 
 		ipcRenderer.on('SEND_LOCAL_DETAIL', function (ev, _localPackageData) {
 			setLocalPackageData(_localPackageData);
 		});
+
+		ipcRenderer.invoke('GET_PYPI_PACKAGE_DATA', packageName);
+
+		ipcRenderer.on(
+			'PYPI_PACKAGE_DATA_OF_' + packageName,
+			(ev, _packageData) => setPackageData(_packageData),
+		);
 
 		if (
 			packageData !== null &&
@@ -59,21 +45,6 @@ function PackageDetail() {
 			setUpdatable(Boolean(_updatable));
 		}
 	}, [packageName]);
-
-	// useEffect(() => {
-
-	// }, [packageData]);
-
-	const loader = (
-		<Grid
-			container
-			justify="center"
-			alignContent="center"
-			style={{ height: '80vh' }}
-		>
-			<CircularProgress color="primary" />
-		</Grid>
-	);
 
 	if (packageData !== null && localPackageData !== null) {
 		return (
@@ -94,7 +65,7 @@ function PackageDetail() {
 			</div>
 		);
 	} else {
-		return loader;
+		return <FullScreenLoader />;
 	}
 }
 

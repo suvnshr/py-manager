@@ -10,12 +10,13 @@ import {
 	Grid,
 	List,
 	Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 
-import { SlideDialogTransition } from '../../commons/helpers';
+import { SlideDialogTransition } from '../commons/helpers';
 import InstallConfirmPackageListItem from './InstallConfirmPackageListItem';
-import { GetApp } from '@material-ui/icons';
-import customTheme from '../../commons/theme';
+import { GetApp } from '@mui/icons-material';
+import customTheme from '../commons/theme';
+import LazyLoadWrapper from '../commons/LazyLoadWrapper';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -26,6 +27,7 @@ export default function InstallConfirmDialog({
 	handleConfirmInstallClose,
 	handlePackageModalClose,
 	setOpenInstallStatusModal,
+	setSearchedPackages,
 }) {
 	const [finalPackages, setFinalPackages] = useState({});
 
@@ -36,6 +38,11 @@ export default function InstallConfirmDialog({
 		handleConfirmInstallClose();
 		handlePackageModalClose();
 		setOpenInstallStatusModal(true);
+
+		// Reset state
+		setSearchedPackages(null);
+		setPackagesToInstall([]);
+		setFinalPackages({});
 	};
 
 	// Removes a package from `packagesToInstall`
@@ -60,37 +67,40 @@ export default function InstallConfirmDialog({
 	}, [packagesToInstall]);
 
 	return (
-		<Dialog
-			open={open}
-			disableBackdropClick
-			fullWidth
-			TransitionComponent={SlideDialogTransition}
-			maxWidth={'sm'}
-			onClose={handleConfirmInstallClose}
-		>
+        <Dialog
+            open={open}
+            fullWidth
+            TransitionComponent={SlideDialogTransition}
+            maxWidth={'sm'}
+            onClose={handleConfirmInstallClose}>
 			<DialogTitle>
 				<div>Choose version</div>
-			<Typography variant="subtitle2" style={{color: customTheme.palette.grey[400]}}>
-				&nbsp;By default the latest versions are selected
-			</Typography>
+				<Typography
+					variant="subtitle2"
+					style={{ color: customTheme.palette.grey[400] }}
+				>
+					&nbsp;By default the latest versions are selected
+				</Typography>
 			</DialogTitle>
 			<DialogContent>
 				<List>
 					{packagesToInstall.length === 0 ? (
-						<Grid container justify="center">
+						<Grid container justifyContent="center">
 							<CircularProgress />
 						</Grid>
 					) : (
 						packagesToInstall.map((packageName, index) => (
-							<InstallConfirmPackageListItem
-								key={`install-confirm-package-list-item-${packageName}-${index}`}
-								{...{
-									packageName,
-									removePackageFromInstallList,
-									getFinalPackages,
-									setFinalPackages,
-								}}
-							/>
+							<LazyLoadWrapper height={65}>
+								<InstallConfirmPackageListItem
+									key={`install-confirm-package-list-item-${packageName}-${index}`}
+									{...{
+										packageName,
+										removePackageFromInstallList,
+										getFinalPackages,
+										setFinalPackages,
+									}}
+								/>
+							</LazyLoadWrapper>
 						))
 					)}
 				</List>
@@ -110,5 +120,5 @@ export default function InstallConfirmDialog({
 				</Button>
 			</DialogActions>
 		</Dialog>
-	);
+    );
 }

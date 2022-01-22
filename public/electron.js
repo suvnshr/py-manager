@@ -1,9 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 // const getPackages = require('./utils/getPackages');
 // const getPackageDetail = require('./utils/getPackageDetail');
-const PipHandler = require('./utils/PipHandler');
+const PipHandler = require('./utils/PipHandler.js');
 
 let mainWindow;
 const pipPackagesHandler = new PipHandler();
@@ -12,16 +12,21 @@ function createWindow() {
 	mainWindow = new BrowserWindow({
 		webPreferences: {
 			nodeIntegration: true,
+			webSecurity: false,
 		},
 	});
 
 	// Make the application run full screen
 	mainWindow.maximize();
 
+	if (!isDev) {
+		Menu.setApplicationMenu(null);
+	}
+
 	mainWindow.loadURL(
 		isDev
 			? 'http://localhost:3000'
-			: `file://${path.join(__dirname, 'src/build/index.html')}`,
+			: `file://${path.join(__dirname, './index.html')}`,
 	);
 
 	// Install the extension if developer mode is ON
@@ -77,4 +82,55 @@ ipcMain.handle('PACKAGES_INSTALL', function (ev, packagesData) {
 
 ipcMain.handle('OPEN_LINK', function (ev, URL) {
 	pipPackagesHandler.openURLInBrowser(URL);
+});
+
+ipcMain.handle('PIP_FILE_DIALOG', function (ev) {
+	pipPackagesHandler.openPIPDialog(mainWindow, dialog);
+});
+
+ipcMain.handle('PIP_ADDITION', function (ev, pipName, pipPath) {
+	pipPackagesHandler.validateAndAddPIP(mainWindow, pipName, pipPath);
+});
+
+ipcMain.handle('GET_CURRENT_PIP', function (ev) {
+	pipPackagesHandler.sendCurrentPIP(mainWindow);
+});
+
+ipcMain.handle('GET_ALL_PIPS', function (ev) {
+	pipPackagesHandler.sendAllPIPS(mainWindow);
+});
+
+ipcMain.handle('GET_DEFAULT_PIP', function (ev) {
+	pipPackagesHandler.sendDefaultPIP(mainWindow);
+});
+
+ipcMain.handle('CHANGE_CURRENT_PIP', function (ev, pipName) {
+	pipPackagesHandler.changeCurrentPIP(mainWindow, pipName);
+});
+
+ipcMain.handle('DELETE_PIP', function (ev, pipName) {
+	pipPackagesHandler.deletePIP(mainWindow, pipName);
+});
+
+ipcMain.handle('GET_HAS_ON_BOARDED', function () {
+	pipPackagesHandler.sendHasOnBoarded(mainWindow);
+});
+
+ipcMain.handle('START_ON_BOARDING', function () {
+	pipPackagesHandler.startOnBoarding(mainWindow);
+});
+
+ipcMain.handle(
+	'GET_PYPI_PACKAGE_DATA',
+	function (ev, packageName, defaultValue = -1) {
+		pipPackagesHandler.getPackageDataFromPyPI(
+			mainWindow,
+			packageName,
+			defaultValue,
+		);
+	},
+);
+
+ipcMain.handle('GET_IS_DEFAULT_PIP_WORKING', function () {
+	pipPackagesHandler.isDefaultPIPWorkingAfterOnboarding(mainWindow);
 });

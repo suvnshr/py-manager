@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState  } from 'react';
 
 import {
-	AppBar,
-	Avatar,
-	Box,
-	Button,
-	CircularProgress,
-	Dialog,
-	Grid,
-	IconButton,
-	List,
-	ListItem,
-	ListItemAvatar,
-	ListItemText,
-	makeStyles,
-	Toolbar,
-	Typography,
-	Chip,
-	ListItemSecondaryAction,
-} from '@material-ui/core';
-import { green, red } from '@material-ui/core/colors';
-import { Cancel, CheckOutlined, GetApp } from '@material-ui/icons';
+    AppBar,
+    Avatar,
+    Box,
+    Button,
+    Dialog,
+    Grid,
+    IconButton,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Toolbar,
+    Typography,
+    Chip,
+    ListItemSecondaryAction,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { green, red } from '@mui/material/colors';
+import { Cancel, CheckOutlined, GetApp } from '@mui/icons-material';
 
-import { SlideDialogTransition } from '../../commons/helpers';
-import { useHistory } from 'react-router-dom';
+import { SlideDialogTransition } from '../commons/helpers';
+import PIPPicker from '../commons/PIPPicker';
+import FullScreenLoader from '../commons/FullScreenLoader';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -32,8 +32,8 @@ const useStyles = makeStyles(theme => ({
 		position: 'relative',
 	},
 	title: {
-		marginLeft: theme.spacing(2),
-		flex: 1,
+		// marginLeft: theme.spacing(2),
+		// flex: 1,
 	},
 	pre: {
 		background: '#1e1e1e',
@@ -43,9 +43,16 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-export default function InstallPackagesStatus({ isOpen, handleClose }) {
+const INSTALLING_TITLE = 'Installing Packages...';
+const INSTALLED_TITLE = 'Installation Complete';
+
+export default function InstallPackagesStatus({
+	isOpen,
+	handleClose,
+	currentPIP,
+}) {
 	const classes = useStyles();
-	const [dialogTitle, setDialogTitle] = useState('Installing Packages...');
+	const [dialogTitle, setDialogTitle] = useState(INSTALLING_TITLE);
 	const [installOutput, setInstallOutput] = useState(null);
 	const [packagesInstallStatus, setPackagesInstallStatus] = useState([]);
 
@@ -70,7 +77,7 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 			Object.keys(packagesInstallStatus).length === 0
 		) {
 			setLoading(false);
-			setDialogTitle('Installation Complete');
+			setDialogTitle(INSTALLED_TITLE);
 		}
 	}, [installOutput, packagesInstallStatus]);
 
@@ -85,42 +92,32 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 	}, [installOutput]);
 
 	const goToHome = () => {
-		window.location.reload();
+		handleClose();
+		setLoading(true);
+		setInstallOutput(null);
+		// window.location.reload();
 	};
 
-	const loader = (
-		<Grid
-			container
-			justify="center"
-			alignContent="center"
-			style={{ height: '80vh' }}
-		>
-			<CircularProgress size={40} />
-		</Grid>
-	);
-
 	return (
-		<div>
+        <div>
 			<Dialog
-				fullScreen
-				open={isOpen}
-				onClose={handleClose}
-				disableBackdropClick={true}
-				TransitionComponent={SlideDialogTransition}
-			>
+                fullScreen
+                open={isOpen}
+                onClose={handleClose}
+                TransitionComponent={SlideDialogTransition}>
 				<AppBar className={classes.appBar}>
 					<Toolbar>
-						<IconButton
-							edge="start"
-							color="inherit"
-							aria-label="close"
-						>
+						<IconButton edge="start" color="inherit" aria-label="close" size="large">
 							<GetApp />
 						</IconButton>
 						<Typography variant="h6" className={classes.title}>
 							{dialogTitle}
 						</Typography>
-
+						<PIPPicker
+							currentPIP={currentPIP}
+							allowPicking={false}
+							outlined={true}
+						/>
 						{!loading ? (
 							<Button
 								autoFocus
@@ -135,18 +132,20 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 				</AppBar>
 
 				{loading ? (
-					loader
+					<FullScreenLoader />
 				) : (
 					<div>
 						<Grid container>
 							<Grid item xs={2} />
 							<Grid item xs={8}>
-								<Box height="40vh">
-									<p />
-									<Typography variant="h6">
-										Installed packages
-									</Typography>
-
+								<p />
+								<Typography variant="h6">
+									Installed packages
+								</Typography>
+								<Box
+									height="38vh"
+									style={{ overflowX: 'auto' }}
+								>
 									<List>
 										{Object.entries(
 											packagesInstallStatus,
@@ -212,7 +211,7 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 								</p>
 								<Box
 									className={classes.pre}
-									height="40vh"
+									height="38vh"
 									id="installation-output"
 								>
 									<pre
@@ -230,5 +229,5 @@ export default function InstallPackagesStatus({ isOpen, handleClose }) {
 				)}
 			</Dialog>
 		</div>
-	);
+    );
 }

@@ -1,11 +1,24 @@
 {
   "name": "py-manager",
-  "version": "0.1.0",
+  "license": "MIT",
+  "version": "v0.1.0",
   "private": true,
+  "author": {
+    "name": "Suvansh Rana",
+    "email": "suvansh.rana.dev@gmail.com"
+  },
+  "description": "A simple GUI based package manager for Python",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/suvansh-rana/py_manager.git"
+  },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^1.3.4",
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
+    "@mui/icons-material": "^5.2.5",
+    "@mui/material": "^5.2.8",
+    "@mui/styles": "^5.2.3",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.2",
     "@testing-library/user-event": "^12.2.2",
@@ -14,26 +27,35 @@
     "compare-versions": "^3.6.0",
     "cross-env": "^7.0.2",
     "electron-is-dev": "^1.2.0",
-    "marked": "^1.2.5",
+    "electron-store": "^7.0.2",
+    "electron-updater": "^4.3.9",
+    "marked": "^2.0.3",
+    "node-cache": "^5.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-hook-form": "^6.15.1",
     "react-icons": "^4.1.0",
+    "react-lazyload": "^3.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
     "rst2html": "^1.0.4",
     "web-vitals": "^0.2.4",
     "yup": "^0.32.8"
   },
-  "main": "./electron/main.js",
+  "main": "public/electron.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-build": "electron-builder",
-    "electron-react-build": "npm run build && npm run electron-build",
-    "electron-react-start": "concurrently \"cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron . \""
+    "electron-start": "electron .",
+    "electron-react-start": "concurrently \"cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .  \"",
+    "electron:build": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js",
+    "electron:linux": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js -l",
+    "electron:win": "npm run build && electron-builder -c.extraMetadata.main=build/electron.js -w",
+    "electron:publish": "electron-builder -c.extraMetadata.main=build/electron.js -p always",
+    "build:only-electron-win": "electron-builder -c.extraMetadata.main=build/electron.js -w",
+    "build:only-electron-linux": "electron-builder -c.extraMetadata.main=build/electron.js -l"
   },
   "eslintConfig": {
     "extends": [
@@ -56,8 +78,61 @@
   "devDependencies": {
     "concurrently": "^5.3.0",
     "electron": "^10.1.5",
-    "electron-builder": "^22.9.1",
+    "electron-builder": "^22.11.7",
     "electron-devtools-installer": "^3.1.1",
     "wait-on": "^5.2.1"
-  }
+  },
+  "build": {
+    "asar": true,
+    "extends": null,
+    "appId": "com.suvansh-rana.pymanager",
+    "files": [
+      "build/**/*",
+      "package.json",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "productName": "Py Manager",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "suvansh-rana",
+        "repo": "py_manager",
+        "private": true
+      }
+    ],
+    "linux": {
+      "category": "Utility",
+      "desktop": "py_manager.desktop",
+      "publish": [
+        "github"
+      ],
+      "target": "deb"
+    },
+    "deb": {
+      "depends": [
+        "libnotify4",
+        "libxtst6",
+        "libnss3"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true
+    }
+  },
+  "homepage": "./"
 }

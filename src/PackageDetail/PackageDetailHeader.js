@@ -1,15 +1,10 @@
 import React, { useEffect } from 'react';
-import {
-	Typography,
-	makeStyles,
-	AppBar,
-	Toolbar,
-	IconButton,
-	Button,
-} from '@material-ui/core';
-import { ArrowBackOutlined } from '@material-ui/icons';
+import { Typography, AppBar, Toolbar, IconButton, Button } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowBackOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
-import routes from '../../commons/routes';
+import routes from '../commons/routes';
+import theme from '../commons/theme';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -38,12 +33,10 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 	};
 
 	useEffect(() => {
-
 		let uninstallPromptShowed = false;
 
 		if (!uninstallPromptShowed) {
-		
-			ipcRenderer.on(
+			ipcRenderer.once(
 				'UNINSTALL_MESSAGE',
 				function (ev, uninstallMessage) {
 					window.alert(uninstallMessage);
@@ -51,10 +44,8 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 					goBack();
 				},
 			);
-
 		}
 	}, []);
-
 
 	const uninstallPackage = () => {
 		let requiredBy = localPackageData['required-by'];
@@ -74,22 +65,22 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 	};
 
 	return (
-		<header className={classes.root}>
+        <header className={classes.root}>
 			<AppBar position="static">
 				<Toolbar>
 					<IconButton
-						edge="start"
-						className={classes.menuButton}
-						color="inherit"
-						onClick={goBack}
-					>
+                        edge="start"
+                        className={classes.menuButton}
+                        color="inherit"
+                        onClick={goBack}
+                        size="large">
 						<ArrowBackOutlined />
 					</IconButton>
 					<Typography className={classes.title} variant="h5" noWrap>
-						{packageName}
+						About <b>{packageName}</b>
 					</Typography>
 
-					{updatable ? (
+					{/* {updatable ? (
 						<Button
 							variant="contained"
 							color="secondary"
@@ -97,20 +88,26 @@ function PackageDetailHeader({ packageName, updatable, localPackageData }) {
 						>
 							Update
 						</Button>
-					) : null}
+					) : null} */}
 
 					<Button
 						variant="contained"
-						color="secondary"
-						style={{ margin: '0 7px' }}
+						style={{
+							margin: '0 7px',
+							backgroundColor: theme.palette.error.dark,
+							color: theme.palette.getContrastText(
+								theme.palette.error.dark,
+							),
+						}}
 						onClick={uninstallPackage}
+						size="small"
 					>
 						Remove
 					</Button>
 				</Toolbar>
 			</AppBar>
 		</header>
-	);
+    );
 }
 
 export default PackageDetailHeader;
