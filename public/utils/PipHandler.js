@@ -100,8 +100,13 @@ class PipHandler {
 
 	async isDefaultPIPWorkingAfterOnboarding(mainWindow) {
 		const { pipPath } = this.getDefaultPIP();
-		const { output } = await execCommand(`${pipPath} --version ${this.PIP_FLAGS}`);
-		mainWindow.webContents.send("IS_DEFAULT_PIP_WORKING", typeof output !== "undefined")
+		const { output } = await execCommand(
+			`${pipPath} --version ${this.PIP_FLAGS}`,
+		);
+		mainWindow.webContents.send(
+			'IS_DEFAULT_PIP_WORKING',
+			Boolean(output),
+		);
 	}
 
 	// Check for some default pip commands are working or not
@@ -116,8 +121,10 @@ class PipHandler {
 
 		for (const pipPath of possiblePIPs) {
 			if (!pipWorking) {
-
-				const { pipValid } = await this.validatePIP(defaultPIPName, pipPath);
+				const { pipValid } = await this.validatePIP(
+					defaultPIPName,
+					pipPath,
+				);
 
 				if (pipValid) {
 					// Set `defaultPIP`
@@ -130,13 +137,13 @@ class PipHandler {
 					// Inform `mainWindow` about onboarding success
 					this.sendHasOnBoarded(mainWindow);
 				}
-			} else { break; }
+			} else {
+				break;
+			}
 		}
-
 
 		// No possible pip paths worked on the machine
 		if (!pipWorking) {
-
 			// Inform mainWindow about onBoarding failure
 			mainWindow.webContents.send('IS_DEFAULT_PIP_WORKING', false);
 		}
@@ -173,9 +180,11 @@ class PipHandler {
 	async getPackages(mainWindow) {
 		const PIP = this.getCurrentPIPPath();
 
-		const { output } = await execCommand(`${PIP} list --format json ${this.PIP_FLAGS}`);
+		const { output } = await execCommand(
+			`${PIP} list --format json ${this.PIP_FLAGS}`,
+		);
 
-		if (typeof output !== "undefined") {
+		if (output) {
 			const packagesJson = output;
 			const packagesData = JSON.parse(packagesJson);
 
@@ -187,9 +196,11 @@ class PipHandler {
 	async getPackageDetail(mainWindow, packageName) {
 		const PIP = this.getCurrentPIPPath();
 
-		const { output: packageDataJson } = await execCommand(`${PIP} show -V ${packageName} ${this.PIP_FLAGS}`);
+		const { output: packageDataJson } = await execCommand(
+			`${PIP} show -V ${packageName} ${this.PIP_FLAGS}`,
+		);
 
-		if (typeof packageDataJson !== "undefined") {
+		if (packageDataJson) {
 			const localPackageData = {};
 			const lines = packageDataJson.split('\n');
 
@@ -204,10 +215,7 @@ class PipHandler {
 				}
 			});
 
-			mainWindow.webContents.send(
-				'SEND_LOCAL_DETAIL',
-				localPackageData,
-			);
+			mainWindow.webContents.send('SEND_LOCAL_DETAIL', localPackageData);
 		}
 	}
 
@@ -226,15 +234,15 @@ class PipHandler {
 		let pypiRes;
 
 		try {
-			pypiRes = await axios
-				.get(`https://pypi.org/search/?q=${packageName}&o=${filter}`);
+			pypiRes = await axios.get(
+				`https://pypi.org/search/?q=${packageName}&o=${filter}`,
+			);
 		} catch (err) {
 			console.log(`Error searching PyPi: ${err}`);
 			mainWindow.webContents.send('SEARCH_DATA', -1);
 		}
 
-		if (typeof pypiRes !== "undefined") {
-
+		if (pypiRes) {
 			const $ = cheerio.load(pypiRes.data);
 
 			const matchedPackages = {};
@@ -243,8 +251,7 @@ class PipHandler {
 			for (const packageAnchorTag of $('a.package-snippet')) {
 				// a.package-snippet > h3.package-snippet__title > span.package-snippet__name
 				const packageName =
-					packageAnchorTag.children[1].children[1].children[0]
-						.data;
+					packageAnchorTag.children[1].children[1].children[0].data;
 
 				// a.package-snippet > p.package-snippet__description
 				const packageDescriptionPTag = packageAnchorTag.children[3];
@@ -258,22 +265,21 @@ class PipHandler {
 				}
 
 				matchedPackages[packageName] = {
-					href:
-						'https://pypi.org' + packageAnchorTag.attribs.href,
+					href: 'https://pypi.org' + packageAnchorTag.attribs.href,
 					packageDescription,
-				};;
+				};
 			}
 
 			mainWindow.webContents.send('SEARCH_DATA', matchedPackages);
 		}
-
-
 	}
 
 	async uninstallPackage(mainWindow, packageName) {
 		const PIP = this.getCurrentPIPPath();
 
-		const { error, stderr } = await execCommand(`${PIP} uninstall ${packageName} --yes ${this.PIP_FLAGS}`);
+		const { error, stderr } = await execCommand(
+			`${PIP} uninstall ${packageName} --yes ${this.PIP_FLAGS}`,
+		);
 
 		let uninstallMessage = `${packageName} is successfully removed`;
 
@@ -281,15 +287,13 @@ class PipHandler {
 			uninstallMessage = `Error while uninstalling ${packageName}: ${error}`;
 		}
 
-		mainWindow.webContents.send(
-			'UNINSTALL_MESSAGE',
-			uninstallMessage,
-		);
+		mainWindow.webContents.send('UNINSTALL_MESSAGE', uninstallMessage);
 	}
 
 	async validatePIP(pipName, pipPath) {
-
-		const { output, error } = await execCommand(`${pipPath} --version ${this.PIP_FLAGS}`);
+		const { output, error } = await execCommand(
+			`${pipPath} --version ${this.PIP_FLAGS}`,
+		);
 
 		let pipNameValid = true;
 		let pipNameError = '';
@@ -354,14 +358,21 @@ class PipHandler {
 
 		const pipValid = pipNameValid && pipPathValid;
 
-		return { pipNameValid, pipPathValid, pipNameError, pipPathError, pipValid };
+		return {
+			pipNameValid,
+			pipPathValid,
+			pipNameError,
+			pipPathError,
+			pipValid,
+		};
 	}
-
 
 	// Validate the PIP name and path and then add it to `electron-store`
 	async validateAndAddPIP(mainWindow, pipName, pipPath) {
-
-		const { pipValid, pipNameError, pipPathError } = await this.validatePIP(pipName, pipPath);
+		const { pipValid, pipNameError, pipPathError } = await this.validatePIP(
+			pipName,
+			pipPath,
+		);
 
 		if (pipValid) {
 			this.addPIPToAllPIPS(pipName, pipPath);
@@ -434,23 +445,33 @@ class PipHandler {
 
 		let packageDataForInstallCommand = '';
 
-		for (const [packageName, packageVersion] of Object.entries(packagesData)) {
-			packageDataForInstallCommand += ` ${packageName}==${packageVersion}`
+		for (const [packageName, packageVersion] of Object.entries(
+			packagesData,
+		)) {
+			packageDataForInstallCommand += ` ${packageName}==${packageVersion}`;
 		}
 
 		const installCommand = PIP + ' install' + packageDataForInstallCommand;
 
 		// Run install command
-		const { output, stderr } = await execCommand(`${installCommand} ${this.PIP_FLAGS}`);
+		const { output, stderr } = await execCommand(
+			`${installCommand} ${this.PIP_FLAGS}`,
+		);
 
 		// Send install output to frontend
 		mainWindow.webContents.send('INSTALL_OUTPUT', output ?? stderr);
 
 		let packageInstallStatus = {};
 
-		for (const [packageName, packageVersion] of Object.entries(packagesData)) {
-
-			let { error: packageShowCommandError, stderr: packageShowCommandStderr } = await execCommand(`${PIP} show ${packageName} ${this.PIP_FLAGS}`);
+		for (const [packageName, packageVersion] of Object.entries(
+			packagesData,
+		)) {
+			let {
+				error: packageShowCommandError,
+				stderr: packageShowCommandStderr,
+			} = await execCommand(
+				`${PIP} show ${packageName} ${this.PIP_FLAGS}`,
+			);
 
 			let pkgInstallErr = false;
 			let message = `${packageName} ${packageVersion} was successfully installed.`;
@@ -458,14 +479,15 @@ class PipHandler {
 			if (
 				packageShowCommandError ||
 				packageShowCommandStderr?.includes('Package(s) not found:')
-
 			) {
 				message = `Error installing ${packageName}`;
 				pkgInstallErr = true;
 			}
 
 			packageInstallStatus[packageName] = {
-				packageVersion, message, error: pkgInstallErr,
+				packageVersion,
+				message,
+				error: pkgInstallErr,
 			};
 
 			if (
@@ -486,7 +508,7 @@ class PipHandler {
 		let packageData = appCache.get(cacheKeyName);
 
 		// Handling miss
-		if (typeof packageData === "undefined") {
+		if (typeof packageData === 'undefined') {
 			try {
 				const res = await axios.get(
 					`https://pypi.org/pypi/${packageName}/json`,
