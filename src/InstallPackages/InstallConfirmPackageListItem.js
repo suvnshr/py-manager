@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import axios from 'axios';
-
 import {
 	ListItem,
 	ListItemIcon,
@@ -80,10 +78,11 @@ export default function InstallConfirmPackageListItem({
 				{loading ? (
 					loader
 				) : (
-					<FormControl>
+					<FormControl variant="standard">
 						<InputLabel>Version</InputLabel>
 
 						<Select
+							
 							value={currentVersion}
 							onChange={handleVersionChange}
 						>
