@@ -1,51 +1,39 @@
 import React, { useState, useContext } from 'react';
 import {
-    Typography as ButtonBase,
-    AppBar,
-    Toolbar,
-    Button,
-    Icon,
-    TextField,
-    MenuItem,
-    Divider,
-    ListItemIcon,
-    InputAdornment,
-    Dialog,
-    Radio,
-    DialogActions,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    Grid,
-    List,
-    ListItem,
+	Typography as ButtonBase,
+	AppBar,
+	Toolbar,
+	IconButton,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import withStyles from '@mui/styles/withStyles';
-import { FaPython } from 'react-icons/fa';
 
-import { Add } from '@mui/icons-material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import PIPAdditionModal from '../Home/PIPAdditionModal';
 import { PIPContext } from '../context/PIPContext';
 import PIPSelectModal from '../Home/PIPSelectModal';
 import PIPPicker from './PIPPicker';
+import { InfoOutlined } from '@mui/icons-material';
+import AboutUsDialog from '../Home/AboutUsDialog';
 
 const useStyles = makeStyles(theme => ({
 	root: {
 		flexGrow: 1,
 	},
-
+	titlePart: {
+		'&::first-letter': {
+			display: 'inline!important',
+			color: theme.palette.secondary.main,
+		},
+	},
 	title: {
 		// flexGrow: 1,
 		display: 'none',
 		[theme.breakpoints.up('sm')]: {
-			display: 'block',
+			display: 'flex',
 		},
 	},
 }));
 
-function Header({}) {
+function Header() {
 	const classes = useStyles();
 
 	const { currentPIP, PIPContextLoaded } = useContext(PIPContext);
@@ -68,17 +56,50 @@ function Header({}) {
 		setPIPSelectModalOpen(false);
 	};
 
+	const [aboutUsDialogOpen, setAboutUsDialogOpen] = React.useState(false);
+
+	const openAboutUsDialog = () => {
+		setAboutUsDialogOpen(true);
+	};
+
+	const closeAboutUsDialog = () => {
+		setAboutUsDialogOpen(false);
+	};
+
 	return (
 		<header className={classes.root}>
-			<AppBar position="static">
+			<AppBar position="static" elevation={5}>
 				<Toolbar>
-					<ButtonBase className={classes.title} variant="h5" noWrap>
-						PyManager
+					<ButtonBase
+						className={classes.title}
+						variant="h5"
+						component="div"
+						noWrap
+					>
+						<div
+							style={{ marginRight: 4 }}
+							className={classes.titlePart}
+						>
+							Py
+						</div>
+						<div className={classes.titlePart}>Manager</div>
 					</ButtonBase>
 
 					{PIPContextLoaded ? (
-						<PIPPicker currentPIP={currentPIP} handlePIPSelectOpen={handlePIPSelectOpen} />
+						<PIPPicker
+							currentPIP={currentPIP}
+							handlePIPSelectOpen={handlePIPSelectOpen}
+						/>
 					) : null}
+					<IconButton
+						size="large"
+						edge="end"
+						color="inherit"
+						aria-label="menu"
+						onClick={openAboutUsDialog}
+					>
+						<InfoOutlined />
+					</IconButton>
 				</Toolbar>
 			</AppBar>
 
@@ -93,6 +114,11 @@ function Header({}) {
 				handleClose={handlePIPSelectClose}
 				handlePIPAddition={handlePIPAddition}
 				handlePIPAdditionDialogClose={handlePIPAdditionDialogClose}
+			/>
+
+			<AboutUsDialog
+				open={aboutUsDialogOpen}
+				handleAboutUsDialogClose={closeAboutUsDialog}
 			/>
 		</header>
 	);
