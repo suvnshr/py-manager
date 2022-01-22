@@ -4,9 +4,10 @@
 
 # Py Manager
 
-[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/suvansh-rana/py-manager?include_prereleases)
 ![GitHub issues](https://img.shields.io/github/issues/suvansh-rana/py-manager)
 ![GitHub all releases](https://img.shields.io/github/downloads/suvansh-rana/py-manager/total)
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
 
 A simple GUI based package manager for python
 
