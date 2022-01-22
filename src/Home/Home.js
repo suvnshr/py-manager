@@ -133,15 +133,7 @@ function Home() {
 
 			<Container>
 				<Grid container justifyContent="space-between" style={{ padding: 20 }}>
-					<Grid item>
-						{packages !== null ? (
-							<Chip
-								component="span"
-								variant="outlined"
-								label={`${packages.length} packages installed`}
-							/>
-						) : null}
-					</Grid>
+					
 
 					<Grid item>
 						{packages !== null ? (
@@ -153,6 +145,15 @@ function Home() {
 							>
 								Install packages
 							</Button>
+						) : null}
+					</Grid>
+					<Grid item>
+						{packages !== null ? (
+							<Chip
+								component="span"
+								variant="outlined"
+								label={`${packages.length} packages installed`}
+							/>
 						) : null}
 					</Grid>
 				</Grid>
