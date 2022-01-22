@@ -7,7 +7,6 @@ import {
 	List,
 	ListItem,
 	Grid,
-	Icon,
 	DialogActions,
 	Radio,
 	Button,
@@ -21,10 +20,8 @@ import { PIPContext } from '../context/PIPContext';
 import {
 	AddCircleOutline,
 	Delete,
-	DeleteOutlined,
 	StorageOutlined,
 } from '@mui/icons-material';
-import PIPAdditionModal from './PIPAdditionModal';
 import { FaPython } from 'react-icons/fa';
 import { SlideDialogTransition } from '../commons/helpers';
 const { ipcRenderer } = window.require('electron');
@@ -120,14 +117,14 @@ const PIPSelectModal = ({
 									},
 									{
 										name: 'PIP Path',
-										gridSize: 8,
+										gridSize: 7,
 										icon: (
 											<StorageOutlined fontSize="small" />
 										),
 									},
 									{
 										name: 'Remove',
-										gridSize: 1,
+										gridSize: 2,
 										icon: <Delete fontSize="small" />,
 									},
 								].map((columnTitleData, index) => (
@@ -188,7 +185,7 @@ const PIPSelectModal = ({
 														{pipName}
 													</Typography>
 												</Grid>
-												<Grid item xs={8}>
+												<Grid item xs={7}>
 													<Typography variant="body1">
 														<pre
 															style={{
@@ -200,7 +197,7 @@ const PIPSelectModal = ({
 														</pre>
 													</Typography>
 												</Grid>
-												<Grid item container xs={1}>
+												<Grid item container xs={2}>
 													{pipName !==
 													defaultPIP.pipName ? (
 														<IconButton size="small">
