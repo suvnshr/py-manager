@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState  } from 'react';
 
 import {
     AppBar,
     Avatar,
     Box,
     Button,
-    CircularProgress,
     Dialog,
     Grid,
     IconButton,
@@ -23,9 +22,6 @@ import { green, red } from '@mui/material/colors';
 import { Cancel, CheckOutlined, GetApp } from '@mui/icons-material';
 
 import { SlideDialogTransition } from '../commons/helpers';
-import { useHistory } from 'react-router-dom';
-import { FaPython } from 'react-icons/fa';
-import { PIPContext } from '../context/PIPContext';
 import PIPPicker from '../commons/PIPPicker';
 import FullScreenLoader from '../commons/FullScreenLoader';
 
