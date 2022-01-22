@@ -1,4 +1,12 @@
-import { Chip, Grid, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import {
+	Chip,
+	Grid,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	Typography,
+} from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 import {
@@ -69,7 +77,7 @@ function PackageDetailBody({
 			<div>
 				<p id="summary-section">{description}</p>
 
-				<div id="chip-section">
+				<div id="info-section">
 					<List>
 						{Object.entries(packageProperties).map(
 							([propertyName, propertyIcon], index) => (
@@ -100,7 +108,7 @@ function PackageDetailBody({
 							<Margin />
 
 							<Typography variant="h5">Required By</Typography>
-							<p>
+							<p style={{ paddingInline: "16px" }}>
 								{requiredBy.map(packageName => (
 									<Chip
 										key={`required-by-${packageName}`}
@@ -121,7 +129,7 @@ function PackageDetailBody({
 					{requires[0].length > 0 ? (
 						<div id="requires-section">
 							<Typography variant="h5">Requires</Typography>
-							<p>
+							<p style={{ paddingInline: "16px" }}>
 								{requires.map(packageName => (
 									<Chip
 										key={`requires-${packageName}`}
