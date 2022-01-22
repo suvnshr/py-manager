@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SearchOutlined, Close, Search, FilterList } from '@mui/icons-material';
+import { SearchOutlined, Close, Search } from '@mui/icons-material';
 
 import {
     CircularProgress,
@@ -30,7 +30,6 @@ import { isNotEmpty, SlideDialogTransition } from '../commons/helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
 import PackageSearchItem from './PackageSearchItem';
 import InstallConfirmDialog from './InstallConfirmDialog';
-import LazyLoadWrapper from '../commons/LazyLoadWrapper';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -164,7 +163,7 @@ export default function InstallPackagesDialog({
 
 					<Grid container justifyContent="space-between" alignItems="center">
 						<Grid item>
-							<FormControl>
+							<FormControl variant="standard">
 								<InputLabel>Order By</InputLabel>
 								<Select
 									value={filter}
@@ -237,9 +236,8 @@ export default function InstallPackagesDialog({
 
 				<p />
 				<Container>
-					<Grid container>
-						<Grid item lg={3} xl={4} />
-						<Grid item xs={12} lg={6} xl={4}>
+					<Grid container justifyContent={"center"}>
+						<Grid item xs={12} lg={8} xl={6}>
 							<form
 								onSubmit={handleSubmit(formSubmit)}
 								method="POST"
