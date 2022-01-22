@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 // const getPackages = require('./utils/getPackages');
@@ -18,6 +18,10 @@ function createWindow() {
 
 	// Make the application run full screen
 	mainWindow.maximize();
+
+	if (!isDev) {
+		Menu.setApplicationMenu(null);
+	}
 
 	mainWindow.loadURL(
 		isDev
