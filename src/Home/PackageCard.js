@@ -5,7 +5,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { Grid, LinearProgress } from '@mui/material';
+import { Divider, Grid, LinearProgress } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import routes from '../commons/routes';
 
@@ -17,6 +17,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	card: {
 		borderRadius: 12,
+		borderBottomRightRadius: 40,
 		// 	minWidth: 275,
 		// 	backgroundImage: `linear-gradient(135deg,
 		// 		${theme.palette.secondary.main},
@@ -34,8 +35,8 @@ const useStyles = makeStyles(theme => ({
 	title: {
 		fontSize: 14,
 	},
-	pos: {
-		marginBottom: 12,
+	packageVersion: {
+		marginBottom: 16,
 	},
 	actions: {
 		justifyContent: 'flex-end',
@@ -84,9 +85,13 @@ export default function PackageCard({
 					<Typography variant="h5" component="h2">
 						{packageName}
 					</Typography>
-					<Typography className={classes.pos} color="textSecondary">
+					<Typography
+						className={classes.packageVersion}
+						color="textSecondary"
+					>
 						{packageVersion}
 					</Typography>
+					<Divider sx={{ mb: 2 }} />
 					<Typography
 						variant="body2"
 						component="div"
@@ -107,6 +112,9 @@ export default function PackageCard({
 						size="large"
 						color="secondary"
 						onClick={goToDetailPage}
+						sx={{
+							borderBottomRightRadius: 40,
+						}}
 					>
 						More
 					</Button>
