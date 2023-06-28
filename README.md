@@ -1,5 +1,5 @@
 <p>
-  <img src="assets/icon.png" height="80px" width="80px">
+  <img src="assets/icon.png" height="80px" >
 </p>
 
 # Py Manager
